@@ -30,7 +30,10 @@ PLUGIN_SKINS = {
     "ubahn": {"label": "U-Bahn (Berlin)"},
     "cyrillic": {"label": "Bulgarian cyrillic (font)"},
     "bkk": {"label": "BKK FUTÁR (Budapest)",
-            "repo": "https://raw.githubusercontent.com/krisztiannagy-gh/departures_skins/main/"},
+            "repo": "https://raw.githubusercontent.com/krisztiannagy-gh/departures_skins/main/",
+            # host settings this skin ignores: hidden on the settings page while it's active
+            "hides": ("clocktime", "show_my_station", "maxdest", "font_size", "clock_row", "arrival",
+                      "line_length", "mins", "xs_line_id", "multi_station_line_id", "listcolor", "listcolor_time")},
     #"departuresplus": {"label": "Departuresplus (coming soon)"},
 }
 

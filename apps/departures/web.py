@@ -34,6 +34,16 @@ def _opt(val, cur, label):
     return "<option value='" + str(val) + "'" + s + ">" + label + "</option>"
 
 
+def _hf(setting_id, active_skin):
+    """Attribute string for a host setting a plugin skin doesn't use: lists the
+    skins that hide it (read by the skin picker's JS) and hides it right away
+    when one of them is active. Skins declare these in skinloader.PLUGIN_SKINS."""
+    import skinloader
+    hidden_for = [sid for sid, info in skinloader.PLUGIN_SKINS.items() if setting_id in info.get("hides", ())]
+    if not hidden_for: return ""
+    return ' data-hide-for="' + " ".join(hidden_for) + '"' + (' style="display:none"' if active_skin in hidden_for else "")
+
+
 def _chk(name, val, url, label):
     c = " checked" if int(val) else ""
     return ('<div class="toggle-row"><label for="' + name + '" class="toggle-label">' + label + '</label>'
@@ -143,19 +153,20 @@ PAGE_TPL = """<!DOCTYPE html>
 {SHIP_SECTION}
 </div>
 {SL_SECTION}
+{BKK_DATA_SECTION}
 </div>
 <div class="card">
-{CLOCKTIME_CHK}
+<div{HF_CLOCKTIME}>{CLOCKTIME_CHK}</div>
 {DEVIATIONS_SECTION}
 {DISRUPTIONS}
 
 {BUTTON_MODE_CHK}
 {SLEEP_CHK}
-{SHOW_STATION_CHK}
+<div{HF_SHOW_STATION}>{SHOW_STATION_CHK}</div>
 </div>
 <div class="card">
 <div class="grp">
-<div class="form-row">{SCROLL_SECTION}<div class="col">
+<div class="form-row">{SCROLL_SECTION}<div class="col"{HF_MAXDEST}>
 <label for="maxdest">{T_NO_DEPARTURES}</label>
 <select id="maxdest" name="maxdest" class="form-control" data-p="maxdest" data-e="change">{MAXDEST_OPTIONS}</select>
 </div></div></div>
@@ -171,23 +182,24 @@ PAGE_TPL = """<!DOCTYPE html>
 <tr><td><b>{T_TONE}</b></td><td><div style="display:flex;gap:10px">{TONE_SWATCHES}</div></td></tr>
 {FONT_SIZE_ROW}
 {CLOCK_ROW_HTML}
+{ARRIVAL_HTML}
 {DLR_SETTINGS_SECTION}
 <tr><td><b>Timer</b></td><td><button type="button" class="btn btn-sm" onclick="location.href='/?timer=set'">&#8987; Configure</button></td></tr>
 <tr><td><b>{T_ROTATION}</b></td><td><button type="button" class="btn btn-sm" data-u="/?rotate=1">&#128260; 90&deg;</button></td></tr>
 <tr><td><b>{T_POWER}</b></td><td><input type="text" id="power" class="form-control" style="width:80px;display:inline" placeholder="{POWER_VAL}" data-p="power" data-e="blur"></td></tr>
-<tr><td><b>{T_LINE_LENGTH}</b></td><td><input type="text" id="line_length" class="form-control" style="width:80px;display:inline" placeholder="{LINE_LENGTH_VAL}" data-p="line_length" data-e="blur"><br><small>{T_LINE_LENGTH_HELP}</small></td></tr>
+<tr{HF_LINE_LENGTH}><td><b>{T_LINE_LENGTH}</b></td><td><input type="text" id="line_length" class="form-control" style="width:80px;display:inline" placeholder="{LINE_LENGTH_VAL}" data-p="line_length" data-e="blur"><br><small>{T_LINE_LENGTH_HELP}</small></td></tr>
 <tr><td><b>{T_SHOW_LINES}</b></td><td><input type="text" id="show_lines" class="form-control" style="width:160px;display:inline" placeholder="{SHOW_LINES_VAL}" data-p="show_lines" data-e="blur"></td></tr>
 <tr><td><b>Strip from destination</b></td><td><input type="text" id="strip_dest" class="form-control" style="width:160px;display:inline" placeholder="{STRIP_DEST_VAL}" data-p="strip_dest" data-e="blur" data-enc="1"></td></tr>
-<tr><td><b>Destination abbreviations</b></td><td><input type="text" id="dest_abbrev" class="form-control" style="width:160px;display:inline" placeholder="{DEST_ABBREV_VAL}" data-p="dest_abbrev" data-e="blur" data-enc="1"></td></tr>
+<tr><td><b>Destination abbreviations</b></td><td><input type="text" id="dest_abbrev" class="form-control" style="width:160px;display:inline" placeholder="{DEST_ABBREV_VAL}" data-p="dest_abbrev" data-e="blur" data-enc="1"><br><small>long=short pairs, e.g. Bevásárlóközpont=Bev.közp. The BKK skin tries these first, then its own list.</small></td></tr>
 <tr><td><b>{T_NO_MORE_DEP}</b></td><td><input type="text" id="no_more_departures" class="form-control" style="width:160px;display:inline" placeholder="{NO_MORE_DEP_VAL}" data-p="no_more_departures" data-e="blur" data-enc="1"></td></tr>
-<tr><td><b>{T_MINS}</b></td><td><input type="text" id="mins" class="form-control" style="width:160px;display:inline" placeholder="{MINS_VAL}" data-p="mins" data-e="blur" data-enc="1"></td></tr>
+<tr{HF_MINS}><td><b>{T_MINS}</b></td><td><input type="text" id="mins" class="form-control" style="width:160px;display:inline" placeholder="{MINS_VAL}" data-p="mins" data-e="blur" data-enc="1"></td></tr>
 {SKIN_DELETE_SECTION}
 </table>
 {RT_INDICATOR_CHK}
-{XS_LINE_ID_CHK}
-{MULTI_STATION_LINE_ID_CHK}
-{LISTCOLOR_CHK}
-{LISTCOLOR_TIME_CHK}
+<div{HF_XS_LINE_ID}>{XS_LINE_ID_CHK}</div>
+<div{HF_MULTI_STATION_LINE_ID}>{MULTI_STATION_LINE_ID_CHK}</div>
+<div{HF_LISTCOLOR}>{LISTCOLOR_CHK}</div>
+<div{HF_LISTCOLOR_TIME}>{LISTCOLOR_TIME_CHK}</div>
 {DEST_SCROLL_CHK}
 {DNS_SECTION}
 </details></div>
@@ -200,9 +212,9 @@ function _ck(){var d=new Date(),h=d.getHours(),m=d.getMinutes();document.getElem
 var OPS=JSON.parse(document.getElementById('opsdata').textContent);var STN=JSON.parse(document.getElementById('stndata').textContent);
 function toggleDropdown(e){e.stopPropagation();document.getElementById('opdd').classList.toggle('open');}
 document.addEventListener('click',function(e){var dd=document.getElementById('opdd');if(dd&&!dd.contains(e.target))dd.classList.remove('open');});
-function pickScr(n){fetch('/?screen='+n);var d=STN[n];if(!d)return;document.querySelectorAll('.scr-btn').forEach(function(b){b.classList.toggle('act',b.textContent==String(n));});var co=d.co,op=d.op.toLowerCase();var el=document.querySelector('.dd-grid img[data-c="'+co+'"]');var f=el?el.outerHTML.replace(/dd-sel/g,'')+' ':'';var nm=d.op?d.op.toUpperCase():'OPERATOR';var ops=OPS[co]||[];for(var i=0;i<ops.length;i++){if(ops[i][0]===op){nm=ops[i][1];break;}}document.getElementById('opbtn').innerHTML=f+nm+' &#9660;';document.getElementById('sstring').placeholder=d.ms||'';var cb={METRO:d.M,BUS:d.B,TRAIN:d.T,TRAM:d.R,SHIP:d.S,r:d.r,g:d.g,b:d.b};for(var k in cb){var e=document.getElementById(k);if(e)e.checked=!!cb[k];}var sl=document.getElementById('slsection');if(sl)sl.style.display=op==='sl'?'':'none';var nb=document.getElementById('night_buses');if(nb)nb.checked=!!d.bo;var of2=document.getElementById('offset');if(of2)of2.value=d.of;var di=document.getElementById('direction');if(di)di.value=d.di;}
+function pickScr(n){fetch('/?screen='+n);var d=STN[n];if(!d)return;document.querySelectorAll('.scr-btn').forEach(function(b){b.classList.toggle('act',b.textContent==String(n));});var co=d.co,op=d.op.toLowerCase();var el=document.querySelector('.dd-grid img[data-c="'+co+'"]');var f=el?el.outerHTML.replace(/dd-sel/g,'')+' ':'';var nm=d.op?d.op.toUpperCase():'OPERATOR';var ops=OPS[co]||[];for(var i=0;i<ops.length;i++){if(ops[i][0]===op){nm=ops[i][1];break;}}document.getElementById('opbtn').innerHTML=f+nm+' &#9660;';document.getElementById('sstring').placeholder=d.ms||'';var cb={METRO:d.M,BUS:d.B,TRAIN:d.T,TRAM:d.R,SHIP:d.S,r:d.r,g:d.g,b:d.b};for(var k in cb){var e=document.getElementById(k);if(e)e.checked=!!cb[k];}var sl=document.getElementById('slsection');if(sl)sl.style.display=op==='sl'?'':'none';var bs=document.getElementById('bkksection');if(bs)bs.style.display=op==='bu'?'':'none';var nb=document.getElementById('night_buses');if(nb)nb.checked=!!d.bo;var of2=document.getElementById('offset');if(of2)of2.value=d.of;var di=document.getElementById('direction');if(di)di.value=d.di;}
 function pickC(c){var d=document.getElementById('ddops');d.innerHTML='';var ops=OPS[c]||[];for(var i=0;i<ops.length;i++){var a=document.createElement('a');a.href='#';a.textContent=ops[i][1];(function(cc,code,name){a.onclick=function(e){e.preventDefault();chCO(cc,code,name);return false;};})(c,ops[i][0],ops[i][1]);d.appendChild(a);}document.querySelectorAll('.dd-grid img').forEach(function(im){im.classList.toggle('dd-sel',im.dataset.c===c);});}
-function chCO(c,o,n){fetch('/?country='+c+'&operator='+o);var el=document.querySelector('.dd-grid img[data-c="'+c+'"');var f='';if(el)f=el.outerHTML.replace(/dd-sel/g,'')+' ';document.getElementById('opbtn').innerHTML=f+n+' &#9660;';document.getElementById('opbtn').style.animation='';document.getElementById('sstring').style.animation='guide-pulse 2.5s ease-in-out infinite';var sl=document.getElementById('slsection');if(sl)sl.style.display=o==='sl'?'':'none';document.getElementById('opdd').classList.remove('open');}
+function chCO(c,o,n){fetch('/?country='+c+'&operator='+o);var el=document.querySelector('.dd-grid img[data-c="'+c+'"');var f='';if(el)f=el.outerHTML.replace(/dd-sel/g,'')+' ';document.getElementById('opbtn').innerHTML=f+n+' &#9660;';document.getElementById('opbtn').style.animation='';document.getElementById('sstring').style.animation='guide-pulse 2.5s ease-in-out infinite';var sl=document.getElementById('slsection');if(sl)sl.style.display=o==='sl'?'':'none';var bs=document.getElementById('bkksection');if(bs)bs.style.display=o==='bu'?'':'none';document.getElementById('opdd').classList.remove('open');}
 function doSearch(){var s=document.getElementById('sstring').value;if(!s)return;var b=document.getElementById('searchbtn');b.disabled=true;b.innerHTML='<span class="spin"></span>';fetch('/search?sstring='+encodeURIComponent(s)).then(function(r){return r.text();}).then(function(h){var sel=document.getElementById('newstation');sel.innerHTML=h;sel.disabled=false;sel.style.borderColor='#ff6060';sel.style.animation='guide-pulse 2.5s ease-in-out infinite';document.getElementById('sstring').style.animation='';b.disabled=false;b.textContent='{T_SEARCH}';}).catch(function(){b.disabled=false;b.textContent='{T_SEARCH}';});}
 function doScan(){fetch('/checknet').then(function(r){return r.text();}).then(function(h){var sel=document.getElementById('ssid');sel.innerHTML=h;sel.disabled=false;document.getElementById('password').disabled=false;document.getElementById('connect_wifi').disabled=false;}).catch(function(){});}
 
@@ -220,7 +232,7 @@ var currentSkin='{CURRENT_SKIN}';
 var mc=document.getElementById('multiple');
 function updateMultipleControls(){var isList=currentSkin==='list',enabled=isList&&mc&&mc.checked;var ms=document.getElementById('multiple_section');if(ms)ms.style.display=isList?'':'none';var sb=document.getElementById('screenbtns');if(sb)sb.style.visibility=enabled?'visible':'hidden';var sc=document.getElementById('stationcount');if(sc)sc.style.display=enabled?'':'none';}
 if(mc)mc.addEventListener('change',updateMultipleControls);
-var sk=document.getElementById('skin_select');if(sk)sk.addEventListener('change',function(){currentSkin=sk.value;updateMultipleControls();var d=document.getElementById('dlr_settings_rows');if(d)d.style.display=sk.value==='tfl_dlr'?'':'none';var vb=document.getElementById('vbz_settings_rows');if(vb)vb.style.display=sk.value==='vbz'?'':'none';var ub=document.getElementById('ubahn_settings_rows');if(ub)ub.style.display=sk.value==='ubahn'?'':'none';var bk=document.getElementById('bkk_settings_rows');if(bk)bk.style.display=sk.value==='bkk'?'':'none';var op=document.getElementById('operator_picker');if(op)op.style.display=sk.value==='dsa'?'none':'';var dp=document.getElementById('dsa_provider_picker');if(dp)dp.style.display=sk.value==='dsa'?'':'none';});
+var sk=document.getElementById('skin_select');if(sk)sk.addEventListener('change',function(){currentSkin=sk.value;updateMultipleControls();var d=document.getElementById('dlr_settings_rows');if(d)d.style.display=sk.value==='tfl_dlr'?'':'none';var vb=document.getElementById('vbz_settings_rows');if(vb)vb.style.display=sk.value==='vbz'?'':'none';var ub=document.getElementById('ubahn_settings_rows');if(ub)ub.style.display=sk.value==='ubahn'?'':'none';var bk=document.getElementById('bkk_settings_rows');if(bk)bk.style.display=sk.value==='bkk'?'':'none';document.querySelectorAll('[data-hide-for]').forEach(function(e){e.style.display=(' '+e.dataset.hideFor+' ').indexOf(' '+sk.value+' ')>=0?'none':'';});var op=document.getElementById('operator_picker');if(op)op.style.display=sk.value==='dsa'?'none':'';var dp=document.getElementById('dsa_provider_picker');if(dp)dp.style.display=sk.value==='dsa'?'':'none';});
 function setFont(v,el){fetch('/?font_size='+v);var bs=el.parentNode.querySelectorAll('button');bs.forEach(function(b){b.classList.remove('on');});el.classList.add('on');}
 function setColor(v,el){fetch('/?color='+v);el.parentNode.querySelectorAll('.color-swatch-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');}
 document.querySelectorAll('[data-u],[data-p]').forEach(function(el){
@@ -507,19 +519,15 @@ def html():
         + '</div>'
     )
 
+    _active_skin = functions.get_skin()
     # BKK FUTÁR skin's own settings - same show/hide-by-id pattern as U-Bahn's.
-    _bkk_active = functions.get_skin() == "bkk"
-    _bln = s.get("bkk_long_names", "abbr_cut")
+    _bkk_active = _active_skin == "bkk"
     _bms = str(s.get("arrival_blink_ms", 600))
     bkk_settings_html = (
         '<div id="bkk_settings_rows" style="' + ("" if _bkk_active else "display:none;") + '">'
-        '<div class="form-row"><label for="bkk_long_names">Long destination names</label>'
-        '<select id="bkk_long_names" class="form-control" data-p="bkk_long_names" data-e="change">'
-        + _opt("abbr_cut", _bln, "Shorten (BKK style), then cut")
-        + _opt("abbr_scroll", _bln, "Shorten (BKK style), then scroll")
-        + _opt("cut", _bln, "Cut")
-        + _opt("scroll", _bln, "Scroll")
-        + '</select></div>'
+        + _chk("BKK_SHORTEN", s.get("bkk_shorten", 1), "/?bkk_shorten=switch",
+               "Shorten long names BKK-style (vasútáll., pu., u.)")
+        + '<small>Whatever still does not fit is cut, or scrolled if "Scroll long destination names" is on under Advanced.</small>'
         '<div class="form-row"><label for="arrival_blink_ms">Blink speed when departing (ms)</label>'
         '<select id="arrival_blink_ms" class="form-control" data-p="arrival_blink_ms" data-e="change">'
         + "".join(_opt(str(v), _bms, str(v)) for v in (400, 500, 600, 700, 800, 1000))
@@ -622,41 +630,48 @@ def html():
         '<button type="button" onclick="setFont(\'large\',this)" class="' + ("on" if _fs == "large" else "") + '">large</button>'
         '</span>'
     )
-    font_size_row = '<tr><td><b>' + T["font_mini"] + '</b></td><td>' + font_size_html + '</td></tr>' if if_long > 64 else ""
+    font_size_row = '<tr' + _hf("font_size", _active_skin) + '><td><b>' + T["font_mini"] + '</b></td><td>' + font_size_html + '</td></tr>' if if_long > 64 else ""
     xs_line_id_chk = _chk("XS_LINE_ID", s.get("xs_line_id", 0), "/?xs_line_id=switch", "Show line ID") if if_long <= 64 else ""
     multi_station_line_id_chk = _chk("MULTI_STATION_LINE_ID", s.get("multi_station_line_id", 0), "/?multi_station_line_id=switch", "Show line ID in multi-line list mode") if if_long > 64 else ""
     clock_row_html = (
-        '<tr><td><b>Clock row</b></td><td>' + _chk("SHOW_CLOCK_ROW", s.get("show_clock_row", 0), "/?show_clock_row=switch", "Show date/time instead of a departure") + '</td></tr>'
-        '<tr><td><b>Clock: show date</b></td><td>' + _chk("CLOCK_ROW_DATE", s.get("clock_row_date", 0), "/?clock_row_date=switch", "Include date") + '</td></tr>'
-        '<tr><td><b>Clock: position</b></td><td><select id="clock_row_position" class="form-control" style="width:130px;display:inline" data-p="clock_row_position" data-e="change">'
+        '<tr' + _hf("clock_row", _active_skin) + '><td><b>Clock row</b></td><td>' + _chk("SHOW_CLOCK_ROW", s.get("show_clock_row", 0), "/?show_clock_row=switch", "Show date/time instead of a departure") + '</td></tr>'
+        '<tr' + _hf("clock_row", _active_skin) + '><td><b>Clock: show date</b></td><td>' + _chk("CLOCK_ROW_DATE", s.get("clock_row_date", 0), "/?clock_row_date=switch", "Include date") + '</td></tr>'
+        '<tr' + _hf("clock_row", _active_skin) + '><td><b>Clock: position</b></td><td><select id="clock_row_position" class="form-control" style="width:130px;display:inline" data-p="clock_row_position" data-e="change">'
         + _opt("bottom", s.get("clock_row_position", "bottom"), "Bottom row")
         + _opt("top", s.get("clock_row_position", "bottom"), "Top row")
         + '</select></td></tr>'
-        '<tr><td><b>Clock: align</b></td><td><select id="clock_row_align" class="form-control" style="width:130px;display:inline" data-p="clock_row_align" data-e="change">'
+        '<tr' + _hf("clock_row", _active_skin) + '><td><b>Clock: align</b></td><td><select id="clock_row_align" class="form-control" style="width:130px;display:inline" data-p="clock_row_align" data-e="change">'
         + _opt("left", s.get("clock_row_align", "left"), "Left")
         + _opt("center", s.get("clock_row_align", "left"), "Center")
         + _opt("right", s.get("clock_row_align", "left"), "Right")
         + '</select></td></tr>'
-        '<tr><td><b>Clock: color</b></td><td><select id="clock_row_color" class="form-control" style="width:130px;display:inline" data-p="clock_row_color" data-e="change">'
+        '<tr' + _hf("clock_row", _active_skin) + '><td><b>Clock: color</b></td><td><select id="clock_row_color" class="form-control" style="width:130px;display:inline" data-p="clock_row_color" data-e="change">'
         + _opt("white", s.get("clock_row_color", "white"), "White")
         + _opt("yellow", s.get("clock_row_color", "white"), "Yellow / amber")
         + _opt("red", s.get("clock_row_color", "white"), "Red")
         + _opt("green", s.get("clock_row_color", "white"), "Green")
         + _opt("blue", s.get("clock_row_color", "white"), "Blue")
         + '</select></td></tr>'
-        '<tr><td><b>Route before destination (►)</b></td><td><select id="dest_via" class="form-control" style="width:220px;display:inline" data-p="dest_via" data-e="change">'
-        + _opt("hide", s.get("dest_via", "hide"), "Hide: final destination only")
-        + _opt("show", s.get("dest_via", "hide"), "Show: Alkotás utca ► Bécsi út")
-        + '</select></td></tr>'
-        '<tr><td><b>Arriving / at stop</b></td><td><select id="arrival_style" class="form-control" style="width:220px;display:inline" data-p="arrival_style" data-e="change">'
-        + _opt("off", s.get("arrival_style", "off"), "Off (hide under 1 min)")
-        + _opt("bkk", s.get("arrival_style", "off"), "Budapest: blinking destination")
-        + _opt("wl_street", s.get("arrival_style", "off"), "Vienna tram/bus: flashing squares")
-        + _opt("wl_ubahn", s.get("arrival_style", "off"), "Vienna U-Bahn: jumping *")
-        + '</select></td></tr>'
-        '<tr><td><b>Budapest blink speed (ms)</b></td><td><select id="arrival_blink_ms" class="form-control" style="width:130px;display:inline" data-p="arrival_blink_ms" data-e="change">'
+    )
+    # Built-in list view's "departing" animation (city skins have their own, fixed one)
+    _hfa = _hf("arrival", _active_skin)
+    arrival_html = (
+        '<tr' + _hfa + '><td><b>Departing / at stop</b></td><td>'
+        + _chk("ARRIVAL_STYLE", 1 if s.get("arrival_style", "off") != "off" else 0, "/?arrival_style=switch",
+               "Keep under-1-minute departures, blinking the destination")
+        + '</td></tr>'
+        '<tr' + _hfa + '><td><b>Blink speed (ms)</b></td><td><select id="arrival_blink_ms_list" class="form-control" style="width:130px;display:inline" data-p="arrival_blink_ms" data-e="change">'
         + "".join(_opt(str(v), str(s.get("arrival_blink_ms", 600)), str(v)) for v in (400, 500, 600, 700, 800, 1000))
         + '</select></td></tr>'
+    )
+    # Budapest data option: BKK headsigns carry the route before a ► arrow
+    bkk_data_section = (
+        '<div id="bkksection" style="' + ("" if str(stn.get("operator", "")).lower() == "bu" else "display:none;") + 'margin-top:10px">'
+        '<label class="control-label" for="dest_via">Route before destination (►)</label>'
+        '<select id="dest_via" class="form-control" data-p="dest_via" data-e="change">'
+        + _opt("hide", s.get("dest_via", "hide"), "Hide: final destination only")
+        + _opt("show", s.get("dest_via", "hide"), "Show: Alkotás utca ► Bécsi út")
+        + '</select></div>'
     )
     # dest_scroll
     dest_scroll_html = _chk("DEST_SCROLL", s.get("dest_scroll", 0), "/?dest_scroll=switch", "Scroll long destination names")
@@ -732,6 +747,17 @@ def html():
         "LISTCOLOR_CHK": listcolor_html,
         "LISTCOLOR_TIME_CHK": listcolor_time_html,
         "CLOCK_ROW_HTML": clock_row_html,
+        "ARRIVAL_HTML": arrival_html,
+        "BKK_DATA_SECTION": bkk_data_section,
+        "HF_CLOCKTIME": _hf("clocktime", _active_skin),
+        "HF_SHOW_STATION": _hf("show_my_station", _active_skin),
+        "HF_MAXDEST": _hf("maxdest", _active_skin),
+        "HF_LINE_LENGTH": _hf("line_length", _active_skin),
+        "HF_MINS": _hf("mins", _active_skin),
+        "HF_XS_LINE_ID": _hf("xs_line_id", _active_skin),
+        "HF_MULTI_STATION_LINE_ID": _hf("multi_station_line_id", _active_skin),
+        "HF_LISTCOLOR": _hf("listcolor", _active_skin),
+        "HF_LISTCOLOR_TIME": _hf("listcolor_time", _active_skin),
         "T_LINE_LENGTH": T["line_length"],
         "T_LINE_LENGTH_HELP": "Most line numbers are 1-2 characters, so this often looks the same until a line uses a longer code.",
         "LINE_LENGTH_VAL": str(s["line_length"]),

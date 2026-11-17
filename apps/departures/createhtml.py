@@ -575,9 +575,8 @@ def huvudsidan(request):
         varinit.cached_departure_data = {}
         functions.switch(_screen=False)
         return (200, {}, "")
-    elif "bkk_long_names" in request.params:
-        v = request.params["bkk_long_names"]
-        varinit.settings["bkk_long_names"] = v if v in ("abbr_cut", "abbr_scroll", "cut", "scroll") else "abbr_cut"
+    elif "bkk_shorten" in request.params:
+        varinit.settings["bkk_shorten"] = 1 - int(varinit.settings.get("bkk_shorten", 1))
         functions.switch(_screen=False)
         return (200, {}, "")
     elif "bkk_max_minutes" in request.params:
@@ -587,6 +586,7 @@ def huvudsidan(request):
         return (200, {}, "")
     elif "arrival_style" in request.params:
         v = request.params["arrival_style"]
+        if v == "switch": v = "off" if functions.arrival_style() != "off" else "bkk"
         varinit.settings["arrival_style"] = v if v in functions.ARRIVAL_STYLES else "off"
         functions.switch(_screen=False)
         return (200, {}, "")
