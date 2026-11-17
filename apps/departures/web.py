@@ -180,6 +180,7 @@ PAGE_TPL = """<!DOCTYPE html>
 <summary>&#9881; {T_ADVANCED}</summary>
 <table>
 <tr><td><b>{T_TONE}</b></td><td><div style="display:flex;gap:10px">{TONE_SWATCHES}</div></td></tr>
+<tr><td><b>Brightness</b></td><td><select id="brightness" class="form-control" style="width:130px;display:inline" data-p="brightness" data-e="change">{BRIGHTNESS_OPTIONS}</select><br><small>Higher levels also keep the colour steadier while the board loads new data.</small></td></tr>
 {FONT_SIZE_ROW}
 {CLOCK_ROW_HTML}
 {ARRIVAL_HTML}
@@ -525,6 +526,13 @@ def html():
     _bms = str(s.get("arrival_blink_ms", 600))
     bkk_settings_html = (
         '<div id="bkk_settings_rows" style="' + ("" if _bkk_active else "display:none;") + '">'
+        + _chk("BKK_STATIC", s.get("bkk_static", 0), "/?bkk_static=switch",
+               "Show static content instead of departures")
+        + '<div class="form-row"><label for="bkk_static_content">Static content</label>'
+        '<select id="bkk_static_content" class="form-control" data-p="bkk_static_content" data-e="change">'
+        + _opt("text", s.get("bkk_static_content", "text"), "Text: BKK FUTÁR (top left)")
+        + _opt("picture", s.get("bkk_static_content", "text"), "Picture (centred): bkk_picture.txt, or a tram")
+        + '</select></div>'
         + _chk("BKK_SHORTEN", s.get("bkk_shorten", 1), "/?bkk_shorten=switch",
                "Shorten long names BKK-style (vasútáll., pu., u.)")
         + '<small>Whatever still does not fit is cut, or scrolled if "Scroll long destination names" is on under Advanced.</small>'
@@ -739,6 +747,7 @@ def html():
         "T_SAVE": T["save"],
         "T_ADVANCED": T["advanced"],
         "T_TONE": T["tone"], "TONE_SWATCHES": tone_html,
+        "BRIGHTNESS_OPTIONS": "".join(_opt(str(v), str(s.get("brightness", 0)), str(v + 1) + (" (dimmest)" if v == 0 else " (brightest)" if v == 4 else "")) for v in range(5)),
         "FONT_SIZE_ROW": font_size_row,
         "XS_LINE_ID_CHK": xs_line_id_chk,
         "MULTI_STATION_LINE_ID_CHK": multi_station_line_id_chk,

@@ -433,7 +433,7 @@ def huvudsidan(request):
         functions.switch(_screen=False)
         return (200, {}, "")
     elif "brightness" in request.params:
-        varinit.settings["brightness"] = int(request.params["brightness"])
+        varinit.settings["brightness"] = min(4, max(0, int(request.params["brightness"])))
         functions.colors()
         if int(varinit.settings["listmode"]): functions.switch(_screen=False)
         return (200, {}, "")
@@ -573,6 +573,15 @@ def huvudsidan(request):
     elif "dest_via" in request.params:
         varinit.settings["dest_via"] = "show" if request.params["dest_via"] == "show" else "hide"
         varinit.cached_departure_data = {}
+        functions.switch(_screen=False)
+        return (200, {}, "")
+    elif "bkk_static" in request.params:
+        varinit.settings["bkk_static"] = 1 - int(varinit.settings.get("bkk_static", 0))
+        functions.switch(_screen=False)
+        return (200, {}, "")
+    elif "bkk_static_content" in request.params:
+        v = request.params["bkk_static_content"]
+        varinit.settings["bkk_static_content"] = v if v in ("text", "picture") else "text"
         functions.switch(_screen=False)
         return (200, {}, "")
     elif "bkk_shorten" in request.params:
