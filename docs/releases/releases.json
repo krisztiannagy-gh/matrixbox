@@ -22,5 +22,11 @@
   "commit": "b061d1a61a687abccea6eceaa56d621871a6671c",
   "title": "Departures 0.989 — No more dark board",
   "notes": "dep-0.989.md"
+ },
+ {
+  "tag": "departures-v0.990",
+  "commit": "25d76b632b79958f7e0144a03672dca0d253944e",
+  "title": "Departures 0.990 — Vienna skin",
+  "notes": "dep-0.990.md"
  }
 ]
