@@ -579,11 +579,6 @@ def huvudsidan(request):
         varinit.settings["bkk_static"] = 1 - int(varinit.settings.get("bkk_static", 0))
         functions.switch(_screen=False)
         return (200, {}, "")
-    elif "bkk_static_content" in request.params:
-        v = request.params["bkk_static_content"]
-        varinit.settings["bkk_static_content"] = v if v in ("text", "picture") else "text"
-        functions.switch(_screen=False)
-        return (200, {}, "")
     elif "bkk_shorten" in request.params:
         varinit.settings["bkk_shorten"] = 1 - int(varinit.settings.get("bkk_shorten", 1))
         functions.switch(_screen=False)
