@@ -1,0 +1,26 @@
+[
+ {
+  "tag": "departures-v0.986",
+  "commit": "5ecce2123172ba0a990e685f0d3f32efb3312cf1",
+  "title": "Departures 0.986 — Budapest (BKK FUTÁR) support",
+  "notes": "dep-0.986.md"
+ },
+ {
+  "tag": "departures-v0.987",
+  "commit": "66e3d1682bc56c78303d19c6805877f4fd9048d5",
+  "title": "Departures 0.987 — Brightness control",
+  "notes": "dep-0.987.md"
+ },
+ {
+  "tag": "departures-v0.988",
+  "commit": "1b12bb2291ed4872fd0207d6031f9b5bc1ccd5c4",
+  "title": "Departures 0.988 — BKK static mode simplified",
+  "notes": "dep-0.988.md"
+ },
+ {
+  "tag": "departures-v0.989",
+  "commit": "b061d1a61a687abccea6eceaa56d621871a6671c",
+  "title": "Departures 0.989 — No more dark board",
+  "notes": "dep-0.989.md"
+ }
+]
