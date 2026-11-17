@@ -588,6 +588,19 @@ def huvudsidan(request):
         except: pass
         functions.switch(_screen=False)
         return (200, {}, "")
+    elif "wl_style" in request.params:
+        varinit.settings["wl_style"] = "ubahn" if request.params["wl_style"] == "ubahn" else "street"
+        functions.switch(_screen=False)
+        return (200, {}, "")
+    elif "wl_shorten" in request.params:
+        varinit.settings["wl_shorten"] = 1 - int(varinit.settings.get("wl_shorten", 1))
+        functions.switch(_screen=False)
+        return (200, {}, "")
+    elif "wl_max_minutes" in request.params:
+        try: varinit.settings["wl_max_minutes"] = min(120, max(5, int(request.params["wl_max_minutes"])))
+        except: pass
+        functions.switch(_screen=False)
+        return (200, {}, "")
     elif "arrival_style" in request.params:
         v = request.params["arrival_style"]
         if v == "switch": v = "off" if functions.arrival_style() != "off" else "bkk"

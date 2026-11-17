@@ -121,6 +121,7 @@ PAGE_TPL = """<!DOCTYPE html>
 {VBZ_SETTINGS_SECTION}
 {UBAHN_SETTINGS_SECTION}
 {BKK_SETTINGS_SECTION}
+{WL_SETTINGS_SECTION}
 {MULTIPLE_SECTION}
 <div class="form-row" style="margin-top:12px">
 <div id="operator_picker" style="{OPERATOR_PICKER_DISP}">
@@ -179,7 +180,7 @@ PAGE_TPL = """<!DOCTYPE html>
 <div class="card"><details>
 <summary>&#9881; {T_ADVANCED}</summary>
 <table>
-<tr><td><b>{T_TONE}</b></td><td><div style="display:flex;gap:10px">{TONE_SWATCHES}</div></td></tr>
+<tr{HF_TONE}><td><b>{T_TONE}</b></td><td><div style="display:flex;gap:10px">{TONE_SWATCHES}</div></td></tr>
 <tr><td><b>Brightness</b></td><td><select id="brightness" class="form-control" style="width:130px;display:inline" data-p="brightness" data-e="change">{BRIGHTNESS_OPTIONS}</select><br><small>Higher levels also keep the colour steadier while the board loads new data.</small></td></tr>
 {FONT_SIZE_ROW}
 {CLOCK_ROW_HTML}
@@ -233,7 +234,7 @@ var currentSkin='{CURRENT_SKIN}';
 var mc=document.getElementById('multiple');
 function updateMultipleControls(){var isList=currentSkin==='list',enabled=isList&&mc&&mc.checked;var ms=document.getElementById('multiple_section');if(ms)ms.style.display=isList?'':'none';var sb=document.getElementById('screenbtns');if(sb)sb.style.visibility=enabled?'visible':'hidden';var sc=document.getElementById('stationcount');if(sc)sc.style.display=enabled?'':'none';}
 if(mc)mc.addEventListener('change',updateMultipleControls);
-var sk=document.getElementById('skin_select');if(sk)sk.addEventListener('change',function(){currentSkin=sk.value;updateMultipleControls();var d=document.getElementById('dlr_settings_rows');if(d)d.style.display=sk.value==='tfl_dlr'?'':'none';var vb=document.getElementById('vbz_settings_rows');if(vb)vb.style.display=sk.value==='vbz'?'':'none';var ub=document.getElementById('ubahn_settings_rows');if(ub)ub.style.display=sk.value==='ubahn'?'':'none';var bk=document.getElementById('bkk_settings_rows');if(bk)bk.style.display=sk.value==='bkk'?'':'none';document.querySelectorAll('[data-hide-for]').forEach(function(e){e.style.display=(' '+e.dataset.hideFor+' ').indexOf(' '+sk.value+' ')>=0?'none':'';});var op=document.getElementById('operator_picker');if(op)op.style.display=sk.value==='dsa'?'none':'';var dp=document.getElementById('dsa_provider_picker');if(dp)dp.style.display=sk.value==='dsa'?'':'none';});
+var sk=document.getElementById('skin_select');if(sk)sk.addEventListener('change',function(){currentSkin=sk.value;updateMultipleControls();var d=document.getElementById('dlr_settings_rows');if(d)d.style.display=sk.value==='tfl_dlr'?'':'none';var vb=document.getElementById('vbz_settings_rows');if(vb)vb.style.display=sk.value==='vbz'?'':'none';var ub=document.getElementById('ubahn_settings_rows');if(ub)ub.style.display=sk.value==='ubahn'?'':'none';var bk=document.getElementById('bkk_settings_rows');if(bk)bk.style.display=sk.value==='bkk'?'':'none';var wl=document.getElementById('wl_settings_rows');if(wl)wl.style.display=sk.value==='wl'?'':'none';document.querySelectorAll('[data-hide-for]').forEach(function(e){e.style.display=(' '+e.dataset.hideFor+' ').indexOf(' '+sk.value+' ')>=0?'none':'';});var op=document.getElementById('operator_picker');if(op)op.style.display=sk.value==='dsa'?'none':'';var dp=document.getElementById('dsa_provider_picker');if(dp)dp.style.display=sk.value==='dsa'?'':'none';});
 function setFont(v,el){fetch('/?font_size='+v);var bs=el.parentNode.querySelectorAll('button');bs.forEach(function(b){b.classList.remove('on');});el.classList.add('on');}
 function setColor(v,el){fetch('/?color='+v);el.parentNode.querySelectorAll('.color-swatch-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');}
 document.querySelectorAll('[data-u],[data-p]').forEach(function(el){
@@ -542,6 +543,25 @@ def html():
         '</div>'
     )
 
+    # Wiener Linien skin's own settings - same show/hide-by-id pattern as BKK's.
+    _wl_active = _active_skin == "wl"
+    wl_settings_html = (
+        '<div id="wl_settings_rows" style="' + ("" if _wl_active else "display:none;") + '">'
+        '<div class="form-row"><label for="wl_style">Board style</label>'
+        '<select id="wl_style" class="form-control" data-p="wl_style" data-e="change">'
+        + _opt("street", s.get("wl_style", "street"), "Street (tram &amp; bus)")
+        + _opt("ubahn", s.get("wl_style", "street"), "U-Bahn")
+        + '</select></div>'
+        + _chk("WL_SHORTEN", s.get("wl_shorten", 1), "/?wl_shorten=switch",
+               "Shorten long names (Bahnhof &rarr; Bhf., Stra&szlig;e &rarr; Str.)")
+        + '<small>Names are split over two lines first. Whatever still does not fit is cut, or scrolled if "Scroll long destination names" is on under Advanced.</small>'
+        '<div class="form-row"><label for="wl_max_minutes">Show departures up to (minutes)</label>'
+        '<select id="wl_max_minutes" class="form-control" data-p="wl_max_minutes" data-e="change">'
+        + "".join(_opt(str(v), str(s.get("wl_max_minutes", 60)), str(v)) for v in (15, 30, 45, 60, 90, 120))
+        + '</select></div>'
+        '</div>'
+    )
+
     # DSA skin's own settings (API provider), shown in place of the ordinary
     # flag/operator picker above - DSA doesn't use data.t-skylt.se stations/
     # operators at all, so that picker is meaningless while it's active.
@@ -734,6 +754,7 @@ def html():
         "VBZ_SETTINGS_SECTION": vbz_settings_html,
         "UBAHN_SETTINGS_SECTION": ubahn_settings_html,
         "BKK_SETTINGS_SECTION": bkk_settings_html,
+        "WL_SETTINGS_SECTION": wl_settings_html,
         "OPERATOR_PICKER_DISP": operator_picker_disp,
         "DSA_PROVIDER_SECTION": dsa_provider_html,
         "SKIN_DELETE_SECTION": skin_delete_html,
@@ -754,6 +775,7 @@ def html():
         "ARRIVAL_HTML": arrival_html,
         "BKK_DATA_SECTION": bkk_data_section,
         "HF_CLOCKTIME": _hf("clocktime", _active_skin),
+        "HF_TONE": _hf("tone", _active_skin),
         "HF_SHOW_STATION": _hf("show_my_station", _active_skin),
         "HF_MAXDEST": _hf("maxdest", _active_skin),
         "HF_LINE_LENGTH": _hf("line_length", _active_skin),

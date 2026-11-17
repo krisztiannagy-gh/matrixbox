@@ -35,6 +35,11 @@ PLUGIN_SKINS = {
             "hides": ("clocktime", "show_my_station", "maxdest", "font_size", "clock_row", "arrival",
                       "line_length", "mins", "xs_line_id", "multi_station_line_id", "listcolor", "listcolor_time",
                       "no_more_departures")},
+    "wl": {"label": "Wiener Linien (Vienna)",
+           "repo": "https://raw.githubusercontent.com/krisztiannagy-gh/departures_skins/main/",
+           "hides": ("clocktime", "show_my_station", "maxdest", "font_size", "clock_row", "arrival",
+                     "line_length", "mins", "xs_line_id", "multi_station_line_id", "listcolor", "listcolor_time",
+                     "no_more_departures", "tone")},
     #"departuresplus": {"label": "Departuresplus (coming soon)"},
 }
 

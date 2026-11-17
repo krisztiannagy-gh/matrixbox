@@ -3,6 +3,13 @@
 Builds of the official MatrixBOX Departures app (based on official v0.985, 15 Nov 2026) with Budapest/BKK support.
 Install/update from the box's **Apps** page with `repository_url` set to this fork. Restart the box after a new release so it sees the new version.
 
+## 0.990 — Vienna skin (2026-11-17)
+- **New skin: Wiener Linien (Vienna).** Pick it in the skin list on the settings page; it downloads from your fork (see Wiener Linien skin v1 for what it shows).
+- **Its settings** appear under the skin picker while it's active: *Board style* (Street (tram & bus) / U-Bahn), *Shorten long names*, *Show departures up to (minutes)*.
+- Settings the skin doesn't use are hidden while it's active, now including the **LED tone** (the skin has its own amber and green).
+
+Update from the box's **Apps** page (restart the box first so it sees the new version).
+
 ## 0.989 — No more dark board (2026-11-17)
 - **Shorter wait for stalled requests:** a data request now gives up after **10 seconds instead of 50**. Before, one stuck request could freeze the board for up to a minute. The T-skylt server can no longer raise this limit remotely.
 - **BKK FUTÁR skin:** the general "No more departures" text setting is hidden while the skin is active, because the skin now has its own status screens (see BKK skin v6, which installs automatically).
