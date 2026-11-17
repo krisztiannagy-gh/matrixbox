@@ -29,10 +29,17 @@ PLUGIN_SKINS = {
     "vbz": {"label": "VBZ (Zürich)"},
     "ubahn": {"label": "U-Bahn (Berlin)"},
     "cyrillic": {"label": "Bulgarian cyrillic (font)"},
+    "bkk": {"label": "BKK FUTÁR (Budapest)",
+            "repo": "https://raw.githubusercontent.com/krisztiannagy-gh/departures_skins/main/"},
     #"departuresplus": {"label": "Departuresplus (coming soon)"},
 }
 
 _cache = {}  # skin_id -> exec'd namespace, kept warm while the app is running
+
+def _repo(skin_id):
+    """Raw-file base URL a skin downloads from: its own "repo" if the registry
+    gives one (skins kept in a fork), otherwise the official skins repo."""
+    return PLUGIN_SKINS.get(skin_id, {}).get("repo", _REPO_RAW)
 
 def _dir(skin_id):
     return _SKINS_DIR + "/" + skin_id
@@ -54,7 +61,7 @@ def check_for_update(skin_id):
     """Fetch just the remote manifest.json (cheap - one small file) and compare
     its version against what's on disk. Returns True if a newer one exists."""
     try:
-        r = requests.get(_REPO_RAW + skin_id + "/manifest.json", timeout=10)
+        r = requests.get(_repo(skin_id) + skin_id + "/manifest.json", timeout=10)
         remote = json.loads(r.text)
         r.close()
     except Exception as e:
@@ -81,11 +88,11 @@ def download(skin_id):
     except: pass
     try: os.mkdir(d)
     except: pass
-    r = requests.get(_REPO_RAW + skin_id + "/manifest.json", timeout=10)
+    r = requests.get(_repo(skin_id) + skin_id + "/manifest.json", timeout=10)
     manifest = json.loads(r.text)
     r.close()
     for fname in manifest.get("files", ["renderer.py"]):
-        r = requests.get(_REPO_RAW + skin_id + "/" + fname, timeout=10)
+        r = requests.get(_repo(skin_id) + skin_id + "/" + fname, timeout=10)
         if r.status_code != 200:
             r.close()
             raise Exception("skin download failed: " + fname + " (" + str(r.status_code) + ")")

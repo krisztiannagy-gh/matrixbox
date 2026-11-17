@@ -533,7 +533,7 @@ def traffic_parser(data, traffic_type, num="1"):
         # Arriving / at the stop: under 1 minute left, or departed within the last
         # ARRIVAL_GRACE seconds. Only kept when an arrival style is chosen and no
         # walking-time offset hides near departures (offset > 0 keeps old behaviour).
-        _arriving = difference < 60 and offset == 0 and arrival_style() != "off"
+        _arriving = difference < 60 and offset == 0 and (arrival_style() != "off" or getattr(varinit, "want_arrivals", False))
         if _arriving: minsleft = "0"
         if int(minsleft[:2]) > offset or _arriving:
             if line["transport_mode"] == "ZET":

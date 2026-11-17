@@ -110,6 +110,7 @@ PAGE_TPL = """<!DOCTYPE html>
 {SKIN_SECTION}
 {VBZ_SETTINGS_SECTION}
 {UBAHN_SETTINGS_SECTION}
+{BKK_SETTINGS_SECTION}
 {MULTIPLE_SECTION}
 <div class="form-row" style="margin-top:12px">
 <div id="operator_picker" style="{OPERATOR_PICKER_DISP}">
@@ -219,7 +220,7 @@ var currentSkin='{CURRENT_SKIN}';
 var mc=document.getElementById('multiple');
 function updateMultipleControls(){var isList=currentSkin==='list',enabled=isList&&mc&&mc.checked;var ms=document.getElementById('multiple_section');if(ms)ms.style.display=isList?'':'none';var sb=document.getElementById('screenbtns');if(sb)sb.style.visibility=enabled?'visible':'hidden';var sc=document.getElementById('stationcount');if(sc)sc.style.display=enabled?'':'none';}
 if(mc)mc.addEventListener('change',updateMultipleControls);
-var sk=document.getElementById('skin_select');if(sk)sk.addEventListener('change',function(){currentSkin=sk.value;updateMultipleControls();var d=document.getElementById('dlr_settings_rows');if(d)d.style.display=sk.value==='tfl_dlr'?'':'none';var vb=document.getElementById('vbz_settings_rows');if(vb)vb.style.display=sk.value==='vbz'?'':'none';var ub=document.getElementById('ubahn_settings_rows');if(ub)ub.style.display=sk.value==='ubahn'?'':'none';var op=document.getElementById('operator_picker');if(op)op.style.display=sk.value==='dsa'?'none':'';var dp=document.getElementById('dsa_provider_picker');if(dp)dp.style.display=sk.value==='dsa'?'':'none';});
+var sk=document.getElementById('skin_select');if(sk)sk.addEventListener('change',function(){currentSkin=sk.value;updateMultipleControls();var d=document.getElementById('dlr_settings_rows');if(d)d.style.display=sk.value==='tfl_dlr'?'':'none';var vb=document.getElementById('vbz_settings_rows');if(vb)vb.style.display=sk.value==='vbz'?'':'none';var ub=document.getElementById('ubahn_settings_rows');if(ub)ub.style.display=sk.value==='ubahn'?'':'none';var bk=document.getElementById('bkk_settings_rows');if(bk)bk.style.display=sk.value==='bkk'?'':'none';var op=document.getElementById('operator_picker');if(op)op.style.display=sk.value==='dsa'?'none':'';var dp=document.getElementById('dsa_provider_picker');if(dp)dp.style.display=sk.value==='dsa'?'':'none';});
 function setFont(v,el){fetch('/?font_size='+v);var bs=el.parentNode.querySelectorAll('button');bs.forEach(function(b){b.classList.remove('on');});el.classList.add('on');}
 function setColor(v,el){fetch('/?color='+v);el.parentNode.querySelectorAll('.color-swatch-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');}
 document.querySelectorAll('[data-u],[data-p]').forEach(function(el){
@@ -506,6 +507,30 @@ def html():
         + '</div>'
     )
 
+    # BKK FUTÁR skin's own settings - same show/hide-by-id pattern as U-Bahn's.
+    _bkk_active = functions.get_skin() == "bkk"
+    _bln = s.get("bkk_long_names", "abbr_cut")
+    _bms = str(s.get("arrival_blink_ms", 600))
+    bkk_settings_html = (
+        '<div id="bkk_settings_rows" style="' + ("" if _bkk_active else "display:none;") + '">'
+        '<div class="form-row"><label for="bkk_long_names">Long destination names</label>'
+        '<select id="bkk_long_names" class="form-control" data-p="bkk_long_names" data-e="change">'
+        + _opt("abbr_cut", _bln, "Shorten (BKK style), then cut")
+        + _opt("abbr_scroll", _bln, "Shorten (BKK style), then scroll")
+        + _opt("cut", _bln, "Cut")
+        + _opt("scroll", _bln, "Scroll")
+        + '</select></div>'
+        '<div class="form-row"><label for="arrival_blink_ms">Blink speed when departing (ms)</label>'
+        '<select id="arrival_blink_ms" class="form-control" data-p="arrival_blink_ms" data-e="change">'
+        + "".join(_opt(str(v), _bms, str(v)) for v in (400, 500, 600, 700, 800, 1000))
+        + '</select></div>'
+        '<div class="form-row"><label for="bkk_max_minutes">Show departures up to (minutes)</label>'
+        '<select id="bkk_max_minutes" class="form-control" data-p="bkk_max_minutes" data-e="change">'
+        + "".join(_opt(str(v), str(s.get("bkk_max_minutes", 60)), str(v)) for v in (15, 30, 45, 60, 90, 120))
+        + '</select></div>'
+        '</div>'
+    )
+
     # DSA skin's own settings (API provider), shown in place of the ordinary
     # flag/operator picker above - DSA doesn't use data.t-skylt.se stations/
     # operators at all, so that picker is meaningless while it's active.
@@ -686,6 +711,7 @@ def html():
         "DLR_SETTINGS_SECTION": dlr_settings_html,
         "VBZ_SETTINGS_SECTION": vbz_settings_html,
         "UBAHN_SETTINGS_SECTION": ubahn_settings_html,
+        "BKK_SETTINGS_SECTION": bkk_settings_html,
         "OPERATOR_PICKER_DISP": operator_picker_disp,
         "DSA_PROVIDER_SECTION": dsa_provider_html,
         "SKIN_DELETE_SECTION": skin_delete_html,

@@ -182,6 +182,8 @@ settingstxt = {"password": "none",
             "clock_row_color":"white",
             "arrival_style":"off",
             "arrival_blink_ms":600,
+            "bkk_long_names":"abbr_cut",
+            "bkk_max_minutes":60,
             "dest_scroll":0,
 
             "dlr_scroll_delay": 15,
