@@ -1,4 +1,5 @@
 {"description":"Live public transport departures around Europe (formerly known as T-Skylt)",
+"v0.986" : ["Krisztian's build: BKK FUTÁR (Budapest) skin, departing rows stay on the board, via headsigns, per-skin settings"],
 "v0.985" : ["more skins, minor bugfix"],
 "icon":0,
 "emoji":"🚉"}
