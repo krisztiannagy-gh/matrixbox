@@ -1,4 +1,5 @@
 {"description":"Live public transport departures around Europe (formerly known as T-Skylt)",
+"v0.989" : ["No more dark board: BKK status screens, outage bridging, 10 s request timeout"],
 "v0.988" : ["BKK static mode simplified to the BKK FUTÁR text"],
 "v0.987" : ["Brightness control, BKK skin start-up text and static content mode"],
 "v0.986" : ["Krisztian's build: BKK FUTÁR (Budapest) skin, departing rows stay on the board, via headsigns, per-skin settings"],

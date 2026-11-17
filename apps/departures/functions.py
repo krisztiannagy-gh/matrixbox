@@ -296,7 +296,7 @@ def check_version():
         except: print("Failed to set advertisement-delay, using default: ", varinit.ad_delay)
         try: varinit.temperature_threshold = ver_txt["temperature_threshold"]
         except: print("Failed to set temperature_threshold, using default: ", varinit.temperature_threshold)
-        try: varinit.socket_timeout = ver_txt["socket_timeout"]
+        try: varinit.socket_timeout = min(10, ver_txt["socket_timeout"])   # never wait longer than 10 s
         except: print("Failed to set socket_timeout, using default: ", varinit.socket_timeout)
     except:
         varinit.new_version_available = 0

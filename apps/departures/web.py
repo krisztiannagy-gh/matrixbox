@@ -192,7 +192,7 @@ PAGE_TPL = """<!DOCTYPE html>
 <tr><td><b>{T_SHOW_LINES}</b></td><td><input type="text" id="show_lines" class="form-control" style="width:160px;display:inline" placeholder="{SHOW_LINES_VAL}" data-p="show_lines" data-e="blur"></td></tr>
 <tr><td><b>Strip from destination</b></td><td><input type="text" id="strip_dest" class="form-control" style="width:160px;display:inline" placeholder="{STRIP_DEST_VAL}" data-p="strip_dest" data-e="blur" data-enc="1"></td></tr>
 <tr><td><b>Destination abbreviations</b></td><td><input type="text" id="dest_abbrev" class="form-control" style="width:160px;display:inline" placeholder="{DEST_ABBREV_VAL}" data-p="dest_abbrev" data-e="blur" data-enc="1"><br><small>long=short pairs, e.g. Bevásárlóközpont=Bev.közp. The BKK skin tries these first, then its own list.</small></td></tr>
-<tr><td><b>{T_NO_MORE_DEP}</b></td><td><input type="text" id="no_more_departures" class="form-control" style="width:160px;display:inline" placeholder="{NO_MORE_DEP_VAL}" data-p="no_more_departures" data-e="blur" data-enc="1"></td></tr>
+<tr{HF_NO_MORE_DEP}><td><b>{T_NO_MORE_DEP}</b></td><td><input type="text" id="no_more_departures" class="form-control" style="width:160px;display:inline" placeholder="{NO_MORE_DEP_VAL}" data-p="no_more_departures" data-e="blur" data-enc="1"></td></tr>
 <tr{HF_MINS}><td><b>{T_MINS}</b></td><td><input type="text" id="mins" class="form-control" style="width:160px;display:inline" placeholder="{MINS_VAL}" data-p="mins" data-e="blur" data-enc="1"></td></tr>
 {SKIN_DELETE_SECTION}
 </table>
@@ -758,6 +758,7 @@ def html():
         "HF_MAXDEST": _hf("maxdest", _active_skin),
         "HF_LINE_LENGTH": _hf("line_length", _active_skin),
         "HF_MINS": _hf("mins", _active_skin),
+        "HF_NO_MORE_DEP": _hf("no_more_departures", _active_skin),
         "HF_XS_LINE_ID": _hf("xs_line_id", _active_skin),
         "HF_MULTI_STATION_LINE_ID": _hf("multi_station_line_id", _active_skin),
         "HF_LISTCOLOR": _hf("listcolor", _active_skin),
