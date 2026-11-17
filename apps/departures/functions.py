@@ -499,12 +499,26 @@ def _converttime(ts, age = 0): return time.mktime(time.struct_time((int(ts[:4]),
 # Headsigns like "Alkotás utca ► Bécsi út / Vörösvári út" (BKK shows the route
 # taken before the arrow). Setting dest_via: "hide" (default) keeps only the
 # final destination after the last arrow, "show" keeps the full headsign.
-VIA_ARROWS = ("►", "▶")
+# The feed's exact arrow character isn't documented, so anything arrow- or
+# symbol-like is treated as the separator and normalised to "►".
+VIA_ARROWS = ("►",)
+_via_logged = set()
+
+def _is_via_char(c):
+    o = ord(c)
+    return (c in ">»" or 0x2190 <= o <= 0x21FF or 0x2794 <= o <= 0x27BF
+            or 0x25A0 <= o <= 0x25FF or 0x2B00 <= o <= 0x2BFF
+            or 0xE000 <= o <= 0xF8FF or 0x1F800 <= o <= 0x1F8FF)
 
 def dest_without_via(dest):
+    if any(_is_via_char(c) for c in dest):
+        if dest not in _via_logged and len(_via_logged) < 20:
+            _via_logged.add(dest)
+            print("■ via headsign:", dest, [hex(ord(c)) for c in dest if _is_via_char(c)])
+        dest = "".join("►" if _is_via_char(c) else c for c in dest)
+        while "►►" in dest: dest = dest.replace("►►", "►")
     if varinit.settings.get("dest_via", "hide") != "hide": return dest
-    for _a in VIA_ARROWS:
-        if _a in dest: dest = dest.split(_a)[-1].strip()
+    if "►" in dest: dest = dest.split("►")[-1].strip()
     return dest
 
 def traffic_parser(data, traffic_type, num="1"):
