@@ -496,6 +496,17 @@ def sort_by_hours(lst):
 
 def _converttime(ts, age = 0): return time.mktime(time.struct_time((int(ts[:4]),int(ts[5:7]),int(ts[8:10]),int(ts[11:13]),int(ts[14:16]),int(ts[17:19]) + int(age),0,-1,-1)))
 
+# Headsigns like "Alkotás utca ► Bécsi út / Vörösvári út" (BKK shows the route
+# taken before the arrow). Setting dest_via: "hide" (default) keeps only the
+# final destination after the last arrow, "show" keeps the full headsign.
+VIA_ARROWS = ("►", "▶")
+
+def dest_without_via(dest):
+    if varinit.settings.get("dest_via", "hide") != "hide": return dest
+    for _a in VIA_ARROWS:
+        if _a in dest: dest = dest.split(_a)[-1].strip()
+    return dest
+
 def traffic_parser(data, traffic_type, num="1"):
     ## Vänder "DIRECTION" på BUSES och TRAINS ##############
     stn = varinit.settings["stations"][num]
@@ -547,7 +558,7 @@ def traffic_parser(data, traffic_type, num="1"):
                 try: 
                     delay = all["deviations"][0] if rt_indicator else ""
                 except: delay = ""
-                dep = ["0", str(line["id"]), delay + all["destination"], _minsleft, str(all["direction_code"]), all.get("color", ""), all.get("delay") or "", 1 if _arriving else 0]
+                dep = ["0", str(line["id"]), delay + dest_without_via(all["destination"]), _minsleft, str(all["direction_code"]), all.get("color", ""), all.get("delay") or "", 1 if _arriving else 0]
                 _strip_dest = varinit.settings.get("strip_dest", [])
                 if isinstance(_strip_dest, list):
                     for _sd in _strip_dest:
@@ -1209,6 +1220,7 @@ def list_mode(mini=False, half=False):
                 is_msg_row = len(all) > 4 and all[4] == MSG_ROW_MARK
                 if is_clock_row and int(record) != 1: continue
                 all[2] = all[2].split('(')[0].split(" via")[0]#.lower()
+                for _a in VIA_ARROWS: all[2] = all[2].replace(_a, ">")
                 _strip_dest = varinit.settings.get("strip_dest", [])
                 if isinstance(_strip_dest, list):
                     for _sd in _strip_dest:

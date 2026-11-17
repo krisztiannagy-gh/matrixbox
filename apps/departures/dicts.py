@@ -183,6 +183,7 @@ settingstxt = {"password": "none",
             "arrival_style":"off",
             "arrival_blink_ms":600,
             "bkk_long_names":"abbr_cut",
+            "dest_via":"hide",
             "bkk_max_minutes":60,
             "dest_scroll":0,
 

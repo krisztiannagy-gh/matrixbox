@@ -570,6 +570,11 @@ def huvudsidan(request):
         varinit.settings["clock_row_align"] = v if v in ("left", "center", "right") else "left"
         functions.switch(_screen=False)
         return (200, {}, "")
+    elif "dest_via" in request.params:
+        varinit.settings["dest_via"] = "show" if request.params["dest_via"] == "show" else "hide"
+        varinit.cached_departure_data = {}
+        functions.switch(_screen=False)
+        return (200, {}, "")
     elif "bkk_long_names" in request.params:
         v = request.params["bkk_long_names"]
         varinit.settings["bkk_long_names"] = v if v in ("abbr_cut", "abbr_scroll", "cut", "scroll") else "abbr_cut"

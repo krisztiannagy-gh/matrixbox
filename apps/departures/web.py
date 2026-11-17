@@ -644,6 +644,10 @@ def html():
         + _opt("green", s.get("clock_row_color", "white"), "Green")
         + _opt("blue", s.get("clock_row_color", "white"), "Blue")
         + '</select></td></tr>'
+        '<tr><td><b>Route before destination (►)</b></td><td><select id="dest_via" class="form-control" style="width:220px;display:inline" data-p="dest_via" data-e="change">'
+        + _opt("hide", s.get("dest_via", "hide"), "Hide: final destination only")
+        + _opt("show", s.get("dest_via", "hide"), "Show: Alkotás utca ► Bécsi út")
+        + '</select></td></tr>'
         '<tr><td><b>Arriving / at stop</b></td><td><select id="arrival_style" class="form-control" style="width:220px;display:inline" data-p="arrival_style" data-e="change">'
         + _opt("off", s.get("arrival_style", "off"), "Off (hide under 1 min)")
         + _opt("bkk", s.get("arrival_style", "off"), "Budapest: blinking destination")
