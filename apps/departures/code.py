@@ -68,6 +68,7 @@ while not varinit.exit:
             _skin = get_skin()       # re-read: set_skin() falls back to "list" on failure
         if _skin == "list":
             if time.monotonic() > varinit.shared["scroll_timer"] + updatedelay: varinit.shared["scroll_timer"] = list_mode()
+            functions.arrival_tick()
         elif _skin == "scroll":
             if varinit.display.width > 64:
                 varinit.tg2.x -= 1

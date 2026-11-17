@@ -528,9 +528,14 @@ def traffic_parser(data, traffic_type, num="1"):
             print(str(varinit.settings["show_lines"]))
             if not all["line"]["id"].lower() in varinit.settings["show_lines"]: continue
         difference = _converttime(all["expected"]) - varinit.currenttime
-        if difference < 0: continue
-        minsleft = str(round(difference/60))
-        if int(minsleft[:2]) > offset:  
+        if difference < -ARRIVAL_GRACE: continue
+        minsleft = str(max(0, round(difference/60)))
+        # Arriving / at the stop: under 1 minute left, or departed within the last
+        # ARRIVAL_GRACE seconds. Only kept when an arrival style is chosen and no
+        # walking-time offset hides near departures (offset > 0 keeps old behaviour).
+        _arriving = difference < 60 and offset == 0 and arrival_style() != "off"
+        if _arriving: minsleft = "0"
+        if int(minsleft[:2]) > offset or _arriving:
             if line["transport_mode"] == "ZET":
                 if int(line["id"]) < 18:
                     line["transport_mode"] = "TRAM"
@@ -542,7 +547,7 @@ def traffic_parser(data, traffic_type, num="1"):
                 try: 
                     delay = all["deviations"][0] if rt_indicator else ""
                 except: delay = ""
-                dep = ["0", str(line["id"]), delay + all["destination"], _minsleft, str(all["direction_code"]), all.get("color", ""), all.get("delay") or ""]
+                dep = ["0", str(line["id"]), delay + all["destination"], _minsleft, str(all["direction_code"]), all.get("color", ""), all.get("delay") or "", 1 if _arriving else 0]
                 _strip_dest = varinit.settings.get("strip_dest", [])
                 if isinstance(_strip_dest, list):
                     for _sd in _strip_dest:
@@ -939,7 +944,116 @@ def apply_clock_row(trainlist, is_clock_station=True):
         kept.append(reserved_row)
     return kept
 
+#### ARRIVAL ANIMATION ####################################################
+# A departure with under 1 minute left (or that left within ARRIVAL_GRACE
+# seconds) is flagged "arriving" by traffic_parser() and, in list mode, drawn
+# in one of these styles instead of a "0" countdown:
+#   bkk       - Budapest FUTÁR: minutes column empty, destination blinks
+#   wl_street - Wiener Linien tram/bus: two quadrants (bottom-left, top-right)
+#               alternate every 0.5 s in the minutes column
+#   wl_ubahn  - Wiener Linien U-Bahn: a "*" jumps between two positions every 2 s
+#   off       - original behaviour (row disappears)
+ARRIVAL_GRACE = 15
+ARRIVAL_STYLES = ("off", "bkk", "wl_street", "wl_ubahn")
+varinit.arrivals = []
+varinit.arrival_phase = -1
+
+def arrival_style():
+    s = varinit.settings.get("arrival_style", "off")
+    return s if s in ARRIVAL_STYLES else "off"
+
+def _arrival_period(style):
+    if style == "bkk": return max(100, int(varinit.settings.get("arrival_blink_ms", 600))) / 1000
+    if style == "wl_ubahn": return 2.0
+    return 0.5
+
+def _arrival_placeholder(style, normal_w):
+    # Blank text reserving the minutes column, so the destination doesn't get
+    # longer/shorter when a row starts arriving.
+    w = normal_w
+    if style == "wl_ubahn": w = max(w, 2 * strlen("*") + 1)
+    if style == "wl_street": w = max(w, fonts[varinit.currentfont]["fontheight"])
+    return BLANK * max(1, w // max(1, strlen(BLANK)))
+
+def _textw(text, font_idx, lower):
+    # Same width maths as renderstring() (strlen() always lowercases, which
+    # under-measures capitals in the non-mini fonts).
+    f = fonts[font_idx]
+    total = 0
+    for c in text:
+        if lower: c = c.lower()
+        if c == LOGO_CHAR and LOGO_CHAR not in f: c = "%"
+        if c not in f: c = "_"
+        total += f[c][0] if isinstance(f[c][1], int) else len(f[c][1])
+    return total
+
+def _rect(bmp, x0, y0, w, h, color):
+    for _x in range(x0, x0 + w):
+        for _y in range(y0, y0 + h):
+            try: bmp[_x, _y] = color
+            except: pass
+
+def _blit_char(bmp, ch, x, y, color, font_idx):
+    f = fonts[font_idx]
+    g = f[ch] if ch in f else f["_"]
+    gw = g[0]
+    for _w in range(gw):
+        for _h in range(f["fontheight"]):
+            if isinstance(g[1], int):
+                try: bit = (g[_h + 1] >> (gw - _w)) & 1
+                except: bit = 0
+            else:
+                try: bit = int(g[_h + 1][_w])
+                except: bit = 0
+            if bit:
+                try: bmp[x + _w, y + _h] = color
+                except: pass
+
+def _arrival_draw(a, phase):
+    style = a["style"]
+    bmp = a["bmp"]
+    if style == "bkk":
+        if a["tg"] is not None:                      # scrolling destination lives in its own TileGrid
+            try: varinit.dest_tgs[a["tg"]].hidden = bool(phase)
+            except: pass
+            return
+        if "saved" not in a:                         # snapshot the drawn destination once
+            a["saved"] = [[bmp[_x, _y] for _y in range(a["y"], a["y"] + a["h"])]
+                          for _x in range(a["dest_x"], a["dest_x"] + a["dest_w"])]
+        for _i, _col in enumerate(a["saved"]):
+            for _j, _v in enumerate(_col):
+                try: bmp[a["dest_x"] + _i, a["y"] + _j] = 0 if phase else _v
+                except: pass
+        return
+    _rect(bmp, a["mins_x"], a["y"], a["mins_w"], a["h"], 0)
+    _end = a["mins_x"] + a["mins_w"]
+    if style == "wl_street":
+        s = a["h"] - (a["h"] % 2)                    # square glyph, even size so quadrants are equal
+        q = s // 2
+        gx, gy = _end - s, a["y"] + a["h"] - s
+        if phase: _rect(bmp, gx + q, gy, q, q, a["color"])      # top-right
+        else:     _rect(bmp, gx, gy + q, q, q, a["color"])      # bottom-left
+    elif style == "wl_ubahn":
+        sw = _textw("*", a["font"], False)
+        _x = _end - sw if phase else _end - 2 * sw - 1
+        _blit_char(bmp, "*", _x, a["y"], a["color"], a["font"])
+
+def arrival_tick():
+    """Called every main-loop pass in list mode; redraws only when the phase flips."""
+    if not varinit.arrivals: return False
+    period = _arrival_period(varinit.arrivals[0]["style"])
+    phase = int(time.monotonic() / period) % 2
+    if phase == varinit.arrival_phase: return False
+    varinit.arrival_phase = phase
+    for a in varinit.arrivals:
+        try: _arrival_draw(a, phase)
+        except Exception as e: print("arrival draw:", e)
+    refresh()
+    return True
+
 def list_mode(mini=False, half=False):
+    varinit.arrivals = []
+    varinit.arrival_phase = -1
     mini = varinit.settings["mini"]
 
     #### debug
@@ -1123,6 +1237,11 @@ def list_mode(mini=False, half=False):
 
                 all[3] += if_not_clocktime
 
+                _arr_style = arrival_style()
+                _arr = (_arr_style != "off" and len(all) > 7 and all[7]
+                        and not (is_clock_row or is_msg_row))
+                if _arr: all[3] = _arrival_placeholder(_arr_style, strlen(all[3]))
+
                 _full_dest_w = 0
                 _max_px = 0
                 _line_col_w = 0
@@ -1220,6 +1339,7 @@ def list_mode(mini=False, half=False):
                     added_space_w = 0
                     line = ""
 
+                _use_tg = False
                 if large_list:
                     _lpart = 100 + x
                     renderstring(all[3], _lpart, 0, 0, inv, sys_msg=min_color, start_x=mins_start_x)
@@ -1256,7 +1376,21 @@ def list_mode(mini=False, half=False):
                         renderstring(dest, 100+x, 0, 0, inv, mini=mini, sys_msg=(clock_color if is_clock_row else False), start_x=multiple_offset + added_space_w)
                         if _show_line:
                             renderstring(line, 100+x, 0, 0, inv, mini=mini, sys_msg=lin_color, start_x=multiple_offset)
-                    if x > varinit.if_tall // 8 - 1: continue
+                if _arr:
+                    _rmini = mini or varinit.rotated or varinit.display.width <= 64
+                    _fidx = 2 if _rmini else varinit.currentfont
+                    _rstep = 6 if _rmini else (13 if _fidx == 0 else 8)
+                    _fh = fonts[_fidx]["fontheight"]
+                    _dest_w = _textw(dest, _fidx, _rmini); _mins_w = _textw(all[3], _fidx, _rmini)
+                    varinit.arrivals.append({
+                        "style": _arr_style, "y": x * _rstep, "h": _fh, "font": _fidx,
+                        "dest_x": multiple_offset + (line_col if large_list else added_space_w),
+                        "dest_w": _dest_w, "mins_x": mins_start_x, "mins_w": _mins_w,
+                        "color": 2 if min_color == "white" else 1,
+                        "tg": x if _use_tg else None,
+                        "bmp": varinit.overlay_bmp if _use_tg else topbottom,
+                    })
+                if not large_list and x > varinit.if_tall // 8 - 1: continue
 
     except Exception as e: print("ERROR ", e)
     refresh()

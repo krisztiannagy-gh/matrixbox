@@ -570,6 +570,16 @@ def huvudsidan(request):
         varinit.settings["clock_row_align"] = v if v in ("left", "center", "right") else "left"
         functions.switch(_screen=False)
         return (200, {}, "")
+    elif "arrival_style" in request.params:
+        v = request.params["arrival_style"]
+        varinit.settings["arrival_style"] = v if v in functions.ARRIVAL_STYLES else "off"
+        functions.switch(_screen=False)
+        return (200, {}, "")
+    elif "arrival_blink_ms" in request.params:
+        try: varinit.settings["arrival_blink_ms"] = min(2000, max(200, int(request.params["arrival_blink_ms"])))
+        except: pass
+        functions.switch(_screen=False)
+        return (200, {}, "")
     elif "clock_row_color" in request.params:
         v = request.params["clock_row_color"]
         varinit.settings["clock_row_color"] = v if v in ("white", "yellow", "red", "green", "blue") else "white"

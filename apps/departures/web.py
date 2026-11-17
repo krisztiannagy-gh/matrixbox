@@ -619,6 +619,15 @@ def html():
         + _opt("green", s.get("clock_row_color", "white"), "Green")
         + _opt("blue", s.get("clock_row_color", "white"), "Blue")
         + '</select></td></tr>'
+        '<tr><td><b>Arriving / at stop</b></td><td><select id="arrival_style" class="form-control" style="width:220px;display:inline" data-p="arrival_style" data-e="change">'
+        + _opt("off", s.get("arrival_style", "off"), "Off (hide under 1 min)")
+        + _opt("bkk", s.get("arrival_style", "off"), "Budapest: blinking destination")
+        + _opt("wl_street", s.get("arrival_style", "off"), "Vienna tram/bus: flashing squares")
+        + _opt("wl_ubahn", s.get("arrival_style", "off"), "Vienna U-Bahn: jumping *")
+        + '</select></td></tr>'
+        '<tr><td><b>Budapest blink speed (ms)</b></td><td><select id="arrival_blink_ms" class="form-control" style="width:130px;display:inline" data-p="arrival_blink_ms" data-e="change">'
+        + "".join(_opt(str(v), str(s.get("arrival_blink_ms", 600)), str(v)) for v in (400, 500, 600, 700, 800, 1000))
+        + '</select></td></tr>'
     )
     # dest_scroll
     dest_scroll_html = _chk("DEST_SCROLL", s.get("dest_scroll", 0), "/?dest_scroll=switch", "Scroll long destination names")

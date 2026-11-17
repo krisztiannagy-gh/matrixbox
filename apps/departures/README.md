@@ -51,3 +51,20 @@ tick.
 
 Settings > **Strip from dest**. Comma-separated substrings to remove from
 destination names (e.g. to drop a suffix your local operator always adds).
+
+## Arriving / at stop
+
+Settings > **Arriving / at stop**. By default a departure disappears once it is
+under a minute away. Choosing a style keeps it on the board, animated, from
+under 1 minute until 15 seconds after its expected departure time:
+
+| Style | Behaviour |
+|---|---|
+| Off | original behaviour, row disappears |
+| Budapest | minutes column goes empty, destination blinks (speed: **Budapest blink speed**, default 600 ms) |
+| Vienna tram/bus | bottom-left and top-right quarters of a square alternate every 0.5 s in the minutes column |
+| Vienna U-Bahn | a `*` jumps between two positions every 2 s in the minutes column |
+
+Only applies in list mode, and only when the stop's **offset** is 0 (an offset
+means near departures are deliberately hidden). Whether a departure is still
+shown after its expected time also depends on the data source returning it.
