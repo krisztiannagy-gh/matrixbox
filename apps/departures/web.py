@@ -529,6 +529,11 @@ def html():
         '<div id="bkk_settings_rows" style="' + ("" if _bkk_active else "display:none;") + '">'
         + _chk("BKK_STATIC", s.get("bkk_static", 0), "/?bkk_static=switch",
                "Show BKK FUTÁR instead of departures")
+        + '<div class="form-row"><label for="bkk_static_style">Static mode shows</label>'
+        '<select id="bkk_static_style" class="form-control" data-p="bkk_static_style" data-e="change">'
+        + _opt("text", s.get("bkk_static_style", "text"), "BKK FUTÁR text")
+        + _opt("logo", s.get("bkk_static_style", "text"), "BKK logo")
+        + '</select></div>'
         + _chk("BKK_SHORTEN", s.get("bkk_shorten", 1), "/?bkk_shorten=switch",
                "Shorten long names BKK-style (vasútáll., pu., u.)")
         + '<small>Whatever still does not fit is cut, or scrolled if "Scroll long destination names" is on under Advanced.</small>'

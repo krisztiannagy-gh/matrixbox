@@ -575,6 +575,10 @@ def huvudsidan(request):
         varinit.cached_departure_data = {}
         functions.switch(_screen=False)
         return (200, {}, "")
+    elif "bkk_static_style" in request.params:
+        varinit.settings["bkk_static_style"] = "logo" if request.params["bkk_static_style"] == "logo" else "text"
+        functions.switch(_screen=False)
+        return (200, {}, "")
     elif "bkk_static" in request.params:
         varinit.settings["bkk_static"] = 1 - int(varinit.settings.get("bkk_static", 0))
         functions.switch(_screen=False)

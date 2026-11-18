@@ -1,4 +1,5 @@
 {"description":"Live public transport departures around Europe (formerly known as T-Skylt)",
+"v0.991" : ["BKK skin: choose text or logo for static mode"],
 "v0.990" : ["Wiener Linien (Vienna) skin: street and U-Bahn board styles"],
 "v0.989" : ["No more dark board: BKK status screens, outage bridging, 10 s request timeout"],
 "v0.988" : ["BKK static mode simplified to the BKK FUTÁR text"],
