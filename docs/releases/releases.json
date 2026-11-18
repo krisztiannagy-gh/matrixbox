@@ -28,5 +28,11 @@
   "commit": "25d76b632b79958f7e0144a03672dca0d253944e",
   "title": "Departures 0.990 — Vienna skin",
   "notes": "dep-0.990.md"
+ },
+ {
+  "tag": "departures-v0.991",
+  "commit": "d169fb007934bfc6cf8a8e5e9d3655984baca510",
+  "title": "Departures 0.991 — BKK static mode: text or logo",
+  "notes": "dep-0.991.md"
  }
 ]
