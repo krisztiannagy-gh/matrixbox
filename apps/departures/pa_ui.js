@@ -53,8 +53,11 @@
       if (!g) { x += 6; continue; }
       ctx.fillStyle = red ? '#ff4040' : '#ff9e00';
       for (var r = 0; r < 7; r++) {
-        var row = g[r + 1];
-        for (var k = 0; k < g[0]; k++) if (row.charAt(k) === '1') ctx.fillRect((x + k) * s, (y + r) * s, s - 1, s - 1);
+        var row = g[r + 1], w = g[0];        // row: number (bit w-1 = leftmost) or older "0101" string
+        for (var k = 0; k < w; k++) {
+          var on = typeof row === 'number' ? Math.floor(row / Math.pow(2, w - 1 - k)) % 2 === 1 : row.charAt(k) === '1';
+          if (on) ctx.fillRect((x + k) * s, (y + r) * s, s - 1, s - 1);
+        }
       }
       x += g[0] + 1;
     }

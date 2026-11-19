@@ -20,6 +20,11 @@ def check_button():
             nightcheck(_switch=True, turnon=varinit.group.hidden); refresh()
     elif b == 2:
         varinit.exit = True
+# one-off cleanup: files that left the app folder in an update stay on the box
+# otherwise (the installer only writes files, it never removes them)
+for _old in ("README.md",):
+    try: os.remove(_old)
+    except OSError: pass
 delay = version_delay()
 #microcontroller.cpu.frequency = 240000000
 from functions import refresh

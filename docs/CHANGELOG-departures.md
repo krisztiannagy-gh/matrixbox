@@ -3,6 +3,12 @@
 Builds of the official MatrixBOX Departures app (based on official v0.985, 15 Nov 2026) with Budapest/BKK support.
 Install/update from the box's **Apps** page with `repository_url` set to this fork. Restart the box after a new release so it sees the new version.
 
+## 0.993 — Smaller install (2026-11-20)
+- The app's README moved to `docs/README-departures.md`, so the box no longer downloads it. The app removes the old copy from the box the first time it starts (3 KB). The box's installer never deletes files by itself, so this one-off cleanup is needed.
+- The announcement preview on the settings page reads the new compact font files of BKK skin v9 and Wiener Linien skin v4 (fonts **20 KB smaller** together). Older font files still work.
+
+Update from the box's **Apps** page (restart the box first so it sees the new version).
+
 ## 0.992 — Passenger announcements (2026-11-20)
 - **New card on the settings page: Passenger announcements** (shown while the BKK FUTÁR skin is active; needs BKK skin v8, which installs automatically). One of each:
   - **Full-screen PA:** every board row is fixed or scrolling text, with a pixel-exact counter and a preview. Start now or at a date and time; end never or at a date and time. It hides the Scrolling PA and skips reminders while it's up.
