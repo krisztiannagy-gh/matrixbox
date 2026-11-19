@@ -59,6 +59,24 @@ def _toggle2(name, val, url, label_left, label_right, caption=""):
             '</div>')
 
 
+def _pa_section(active_skin):
+    """Passenger announcements card (app level). Shown for skins that can draw
+    PAs (skinloader.PLUGIN_SKINS[...]["pa"]); the block itself is built by
+    pa_ui.js from /pa/state."""
+    import skinloader
+    skins = [sid for sid, info in skinloader.PLUGIN_SKINS.items() if info.get("pa")]
+    if not skins: return ""
+    try:
+        with open("pa_ui.js") as f: js = "\n".join(l.strip() for l in f)   # indentation off: lighter page
+    except Exception:
+        return ""
+    return ('<div class="card" id="pa_card" data-skins="' + " ".join(skins) + '"'
+            + ('' if active_skin in skins else ' style="display:none"') + '>'
+            '<div class="section-title">Passenger announcements</div>'
+            '<div id="pa_root"><span style="color:var(--muted)">Loading…</span></div></div>'
+            '<script>' + js + '</script>')
+
+
 def _rssi(functions):
     try:
         ai = functions.wifi.radio.ap_info
@@ -144,6 +162,7 @@ PAGE_TPL = """<!DOCTYPE html>
 <button type="button" class="btn" id="searchbtn" onclick="doSearch()" {SEARCH_DIS}>{T_SEARCH}</button>
 </div>
 </div>
+{PA_SECTION}
 <div class="card">
 <div class="grp-title">{T_TRAFFIC_TYPES}</div>
 <div class="tt-grid">
@@ -759,6 +778,7 @@ def html():
         "VBZ_SETTINGS_SECTION": vbz_settings_html,
         "UBAHN_SETTINGS_SECTION": ubahn_settings_html,
         "BKK_SETTINGS_SECTION": bkk_settings_html,
+        "PA_SECTION": _pa_section(_active_skin),
         "WL_SETTINGS_SECTION": wl_settings_html,
         "OPERATOR_PICKER_DISP": operator_picker_disp,
         "DSA_PROVIDER_SECTION": dsa_provider_html,

@@ -994,6 +994,46 @@ def _ping_graph(request):
 
 
 
+# --- passenger announcements (pa.py) ------------------------------------------------
+def _pa_geom():
+    """Rows and width the active skin gives PAs, or None if it can't show them."""
+    import skinloader
+    info = skinloader.PLUGIN_SKINS.get(functions.get_skin(), {}).get("pa")
+    if not info: return None
+    pitch = int(info.get("pitch", 8))
+    return {"rows": max(1, varinit.if_tall // pitch), "width": varinit.if_long, "font": info.get("font")}
+
+def _pa_json(data):
+    return (200, {"Cache-Control": "no-store"}, data)
+
+@ampule.route("/pa/state")
+def _pa_state(request):
+    import pa
+    g = _pa_geom()
+    out = json.loads(pa.state_json(g["rows"] if g else 4, g["width"] if g else varinit.if_long))
+    out["skin_ok"] = g is not None
+    return _pa_json(json.dumps(out))
+
+@ampule.route("/pa/font")
+def _pa_font(request):
+    g = _pa_geom()
+    try:
+        with open(g["font"]) as f: return _pa_json(f.read())
+    except Exception:
+        return _pa_json("{}")
+
+@ampule.route("/pa", method="POST")
+def _pa_save(request):
+    import pa
+    try: d = json.loads(request.body)
+    except Exception: return _pa_json(json.dumps({"ok": False, "msg": "Bad request."}))
+    g = _pa_geom() or {"rows": 4, "width": varinit.if_long}
+    width_fn = None
+    try: width_fn = varinit.active_skin_ns["text_width"]
+    except Exception: pass
+    ok, msg = pa.apply(str(d.get("id", "")), d, g["rows"], g["width"], width_fn)
+    return _pa_json(json.dumps({"ok": ok, "msg": msg}))
+
 @ampule.route("/exit", method="GET")
 def webinterface(request):
     varinit.exit = True

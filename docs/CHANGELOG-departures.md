@@ -3,6 +3,19 @@
 Builds of the official MatrixBOX Departures app (based on official v0.985, 15 Nov 2026) with Budapest/BKK support.
 Install/update from the box's **Apps** page with `repository_url` set to this fork. Restart the box after a new release so it sees the new version.
 
+## 0.992 — Passenger announcements (2026-11-20)
+- **New card on the settings page: Passenger announcements** (shown while the BKK FUTÁR skin is active; needs BKK skin v8, which installs automatically). One of each:
+  - **Full-screen PA:** every board row is fixed or scrolling text, with a pixel-exact counter and a preview. Start now or at a date and time; end never or at a date and time. It hides the Scrolling PA and skips reminders while it's up.
+  - **Scrolling PA:** one text up to 250 characters in the bottom row, looping. Same start and end options. Hidden under a full-screen PA and back afterwards if still live.
+  - **Reminder:** a bottom-row text every 2–60 minutes, 1–5 loops each time. Skipped while another PA is on the board.
+  - Each PA has its own separator (default `***`; empty = a gap). Scroll speed slow / normal / fast for all.
+  - A PA is locked while it's on. Switching off (or reaching its end) lets the current pass finish. A PA that reaches its end switches itself off.
+  - **Box time** is shown, because start and end times use the box clock.
+- PAs are stored in the app's settings (not per skin), so other skins can show them later.
+- Host: the box clock records when it was last set; skins can ask for spare departure rows.
+
+Update from the box's **Apps** page (restart the box first so it sees the new version).
+
 ## 0.991 — BKK static mode: text or logo (2026-11-18)
 - **BKK FUTÁR skin:** new setting *Static mode shows* (BKK FUTÁR text / BKK logo), next to *Show BKK FUTÁR instead of departures*. Needs BKK skin v7, which installs automatically.
 

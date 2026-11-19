@@ -469,6 +469,9 @@ def fetch_data(host, port=80, args="", headers = "", filetype="text"):
         date = x.split("Date:",1)[1]
         date = date.split("\r\n")[0]
         varinit.currenttime = convert_date(date)
+        # when the box clock was last set (int ms): the PA engine counts on from here
+        try: varinit.currenttime_ms = time.monotonic_ns() // 1000000
+        except Exception: varinit.currenttime_ms = int(time.monotonic() * 1000)
     except: pass
     print("--------------------------------------------------------- ")
     if varinit.if_long > 128 and not int(varinit.settings["listmode"]): version_delay(slowdown=2)
@@ -533,6 +536,9 @@ def traffic_parser(data, traffic_type, num="1"):
     dataout = []
     _maxdest = int(varinit.settings["maxdest"])
     if int(varinit.settings["listmode"]): _maxdest = varinit.if_tall // 8
+    # a plugin skin can ask for more rows than fit (spare departures between requests)
+    try: _maxdest = max(_maxdest, int(varinit.want_rows))
+    except Exception: pass
     #show_lines = varinit.settings["show_lines"]
     #has_line_filter = isinstance(show_lines, list) and len(show_lines) > 0
     clocktime = varinit.settings["clocktime"]

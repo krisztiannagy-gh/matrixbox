@@ -31,6 +31,8 @@ PLUGIN_SKINS = {
     "cyrillic": {"label": "Bulgarian cyrillic (font)"},
     "bkk": {"label": "BKK FUTÁR (Budapest)",
             "repo": "https://raw.githubusercontent.com/krisztiannagy-gh/departures_skins/main/",
+            # passenger announcements (pa.py): font for the settings-page preview, row pitch
+            "pa": {"font": "skins/bkk/bkk_font.json", "pitch": 8, "top": 1},
             # host settings this skin ignores: hidden on the settings page while it's active
             "hides": ("clocktime", "show_my_station", "maxdest", "font_size", "clock_row", "arrival",
                       "line_length", "mins", "xs_line_id", "multi_station_line_id", "listcolor", "listcolor_time",
