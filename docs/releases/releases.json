@@ -34,5 +34,11 @@
   "commit": "d169fb007934bfc6cf8a8e5e9d3655984baca510",
   "title": "Departures 0.991 — BKK static mode: text or logo",
   "notes": "dep-0.991.md"
+ },
+ {
+  "tag": "departures-v0.992",
+  "commit": "7307a9b204fea586875e4a03c5098237d502f79b",
+  "title": "Departures 0.992 — passenger announcements",
+  "notes": "dep-0.992.md"
  }
 ]
