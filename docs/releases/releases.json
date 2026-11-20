@@ -52,5 +52,11 @@
   "commit": "8c822485d6216a385fa25669a25b354b83df80a2",
   "title": "Departures 0.994 — smoother PA scrolling",
   "notes": "dep-0.994.md"
+ },
+ {
+  "tag": "departures-v0.995",
+  "commit": "45a741b6dbfe56841955b44b4b6b122aef60c8bd",
+  "title": "Departures 0.995 — London Underground skin",
+  "notes": "dep-0.995.md"
  }
 ]
