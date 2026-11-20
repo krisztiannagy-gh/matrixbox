@@ -579,6 +579,8 @@ def traffic_parser(data, traffic_type, num="1"):
                     delay = all["deviations"][0] if rt_indicator else ""
                 except: delay = ""
                 dep = ["0", str(line["id"]), delay + dest_without_via(all["destination"]), _minsleft, str(all["direction_code"]), all.get("color", ""), all.get("delay") or "", 1 if _arriving else 0]
+                # index 8 is kept free (step-free flag in the Vienna skin); 9 = seconds to the expected time
+                if getattr(varinit, "want_seconds", False): dep += ["", int(difference)]
                 _strip_dest = varinit.settings.get("strip_dest", [])
                 if isinstance(_strip_dest, list):
                     for _sd in _strip_dest:

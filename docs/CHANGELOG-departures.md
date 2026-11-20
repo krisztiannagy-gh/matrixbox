@@ -3,6 +3,13 @@
 Builds of the official MatrixBOX Departures app (based on official v0.985, 15 Nov 2026) with Budapest/BKK support.
 Install/update from the box's **Apps** page with `repository_url` set to this fork. Restart the box after a new release so it sees the new version.
 
+## 0.995 — London Underground skin (2026-11-20)
+- **New skin: London Underground** (needs London Underground skin v1, which downloads when you pick it). Its settings block: *Long station names* (scroll or cut), *Hide trains to* (destinations of the other direction), and the *Line* and *Direction* shown when there are no trains.
+- The station's *Direction* dropdown is hidden while this skin is active: T-Skylt sends no direction for London, so it has no effect there.
+- Skins can now ask the app for the seconds to each train's expected time (the London skin uses them to time a train's departure). Other skins are unchanged.
+
+Update from the box's **Apps** page (restart the box first so it sees the new version).
+
 ## 0.994 — Smoother PA scrolling (2026-11-20)
 - **Settings page:** the announcements card checks the box's status only while the page is visible, every 10 s instead of 5 (each check stops the board's animation for a moment).
 - **New page `/pa/perf`:** scrolling statistics from the box: stalls, memory clean-ups, requests, main-loop time, free memory. `?reset=1` starts a new measurement. Linked at the bottom of the announcements card.

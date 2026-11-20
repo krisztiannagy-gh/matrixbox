@@ -42,6 +42,12 @@ PLUGIN_SKINS = {
            "hides": ("clocktime", "show_my_station", "maxdest", "font_size", "clock_row", "arrival",
                      "line_length", "mins", "xs_line_id", "multi_station_line_id", "listcolor", "listcolor_time",
                      "no_more_departures", "tone")},
+    "lu": {"label": "London Underground",
+           "repo": "https://raw.githubusercontent.com/krisztiannagy-gh/departures_skins/main/",
+           # direction: T-Skylt has no direction codes for London; the skin's "Hide trains to" does it
+           "hides": ("clocktime", "show_my_station", "maxdest", "font_size", "clock_row", "arrival",
+                     "line_length", "mins", "xs_line_id", "multi_station_line_id", "listcolor", "listcolor_time",
+                     "no_more_departures", "tone", "direction")},
     #"departuresplus": {"label": "Departuresplus (coming soon)"},
 }
 

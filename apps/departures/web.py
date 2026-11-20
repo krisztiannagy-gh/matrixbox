@@ -44,6 +44,11 @@ def _hf(setting_id, active_skin):
     return ' data-hide-for="' + " ".join(hidden_for) + '"' + (' style="display:none"' if active_skin in hidden_for else "")
 
 
+def _esc(t):
+    """Text for an HTML attribute value."""
+    return str(t).replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;").replace(">", "&gt;")
+
+
 def _chk(name, val, url, label):
     c = " checked" if int(val) else ""
     return ('<div class="toggle-row"><label for="' + name + '" class="toggle-label">' + label + '</label>'
@@ -140,6 +145,7 @@ PAGE_TPL = """<!DOCTYPE html>
 {UBAHN_SETTINGS_SECTION}
 {BKK_SETTINGS_SECTION}
 {WL_SETTINGS_SECTION}
+{LU_SETTINGS_SECTION}
 {MULTIPLE_SECTION}
 <div class="form-row" style="margin-top:12px">
 <div id="operator_picker" style="{OPERATOR_PICKER_DISP}">
@@ -194,7 +200,7 @@ PAGE_TPL = """<!DOCTYPE html>
 <div class="form-row"><div class="col">
 <label for="offset">{T_HIDE_DEPARTURES}</label>
 <select id="offset" name="offset" class="form-control" data-p="offset" data-e="change">{OFFSET_OPTIONS}</select>
-</div><div class="col">{DIRECTION_SECTION}</div></div></div>
+</div><div class="col"{HF_DIRECTION}>{DIRECTION_SECTION}</div></div></div>
 </div>
 <div class="card"><details>
 <summary>&#9881; {T_ADVANCED}</summary>
@@ -253,7 +259,7 @@ var currentSkin='{CURRENT_SKIN}';
 var mc=document.getElementById('multiple');
 function updateMultipleControls(){var isList=currentSkin==='list',enabled=isList&&mc&&mc.checked;var ms=document.getElementById('multiple_section');if(ms)ms.style.display=isList?'':'none';var sb=document.getElementById('screenbtns');if(sb)sb.style.visibility=enabled?'visible':'hidden';var sc=document.getElementById('stationcount');if(sc)sc.style.display=enabled?'':'none';}
 if(mc)mc.addEventListener('change',updateMultipleControls);
-var sk=document.getElementById('skin_select');if(sk)sk.addEventListener('change',function(){currentSkin=sk.value;updateMultipleControls();var d=document.getElementById('dlr_settings_rows');if(d)d.style.display=sk.value==='tfl_dlr'?'':'none';var vb=document.getElementById('vbz_settings_rows');if(vb)vb.style.display=sk.value==='vbz'?'':'none';var ub=document.getElementById('ubahn_settings_rows');if(ub)ub.style.display=sk.value==='ubahn'?'':'none';var bk=document.getElementById('bkk_settings_rows');if(bk)bk.style.display=sk.value==='bkk'?'':'none';var wl=document.getElementById('wl_settings_rows');if(wl)wl.style.display=sk.value==='wl'?'':'none';document.querySelectorAll('[data-hide-for]').forEach(function(e){e.style.display=(' '+e.dataset.hideFor+' ').indexOf(' '+sk.value+' ')>=0?'none':'';});var op=document.getElementById('operator_picker');if(op)op.style.display=sk.value==='dsa'?'none':'';var dp=document.getElementById('dsa_provider_picker');if(dp)dp.style.display=sk.value==='dsa'?'':'none';});
+var sk=document.getElementById('skin_select');if(sk)sk.addEventListener('change',function(){currentSkin=sk.value;updateMultipleControls();var d=document.getElementById('dlr_settings_rows');if(d)d.style.display=sk.value==='tfl_dlr'?'':'none';var vb=document.getElementById('vbz_settings_rows');if(vb)vb.style.display=sk.value==='vbz'?'':'none';var ub=document.getElementById('ubahn_settings_rows');if(ub)ub.style.display=sk.value==='ubahn'?'':'none';var bk=document.getElementById('bkk_settings_rows');if(bk)bk.style.display=sk.value==='bkk'?'':'none';var wl=document.getElementById('wl_settings_rows');if(wl)wl.style.display=sk.value==='wl'?'':'none';var lu=document.getElementById('lu_settings_rows');if(lu)lu.style.display=sk.value==='lu'?'':'none';document.querySelectorAll('[data-hide-for]').forEach(function(e){e.style.display=(' '+e.dataset.hideFor+' ').indexOf(' '+sk.value+' ')>=0?'none':'';});var op=document.getElementById('operator_picker');if(op)op.style.display=sk.value==='dsa'?'none':'';var dp=document.getElementById('dsa_provider_picker');if(dp)dp.style.display=sk.value==='dsa'?'':'none';});
 function setFont(v,el){fetch('/?font_size='+v);var bs=el.parentNode.querySelectorAll('button');bs.forEach(function(b){b.classList.remove('on');});el.classList.add('on');}
 function setColor(v,el){fetch('/?color='+v);el.parentNode.querySelectorAll('.color-swatch-btn').forEach(function(b){b.classList.remove('active');});el.classList.add('active');}
 document.querySelectorAll('[data-u],[data-p]').forEach(function(el){
@@ -586,6 +592,31 @@ def html():
         '</div>'
     )
 
+    # London Underground skin's own settings - same show/hide-by-id pattern.
+    # Text fields are pre-filled and sent on change (an untouched field never clears).
+    _lu_active = _active_skin == "lu"
+    _hide = s.get("lu_hide_dest", [])
+    _hide = ", ".join(_hide) if isinstance(_hide, list) else str(_hide)
+    def _lu_txt(key, label, val, hint):
+        return ('<div class="form-row"><label for="' + key + '">' + label + '</label>'
+                '<input type="text" id="' + key + '" class="form-control" value="' + _esc(val) + '" placeholder="' + hint + '"'
+                ' data-p="' + key + '" data-e="change" data-enc="1"></div>')
+    lu_settings_html = (
+        '<div id="lu_settings_rows" style="' + ("" if _lu_active else "display:none;") + '">'
+        '<div class="form-row"><label for="lu_long">Long station names</label>'
+        '<select id="lu_long" class="form-control" data-p="lu_long" data-e="change">'
+        + _opt("scroll", s.get("lu_long", "scroll"), "Scroll")
+        + _opt("cut", s.get("lu_long", "scroll"), "Cut")
+        + '</select></div>'
+        + _lu_txt("lu_hide_dest", "Hide trains to", _hide, "e.g. Morden, Kennington")
+        + '<small>Comma-separated destinations of the other direction (T-Skylt has no platform or direction for London). '
+        'A name also hides destinations that start with it. Use &quot;Show lines&quot; under Advanced for the line.</small>'
+        + _lu_txt("lu_line", "Line (shown when there are no trains)", s.get("lu_line", ""), "e.g. Northern line")
+        + _lu_txt("lu_direction", "Direction (shown when there are no trains)", s.get("lu_direction", ""), "e.g. Northbound")
+        + '<small>Both empty: only the clock.</small>'
+        '</div>'
+    )
+
     # DSA skin's own settings (API provider), shown in place of the ordinary
     # flag/operator picker above - DSA doesn't use data.t-skylt.se stations/
     # operators at all, so that picker is meaningless while it's active.
@@ -780,6 +811,7 @@ def html():
         "BKK_SETTINGS_SECTION": bkk_settings_html,
         "PA_SECTION": _pa_section(_active_skin),
         "WL_SETTINGS_SECTION": wl_settings_html,
+        "LU_SETTINGS_SECTION": lu_settings_html,
         "OPERATOR_PICKER_DISP": operator_picker_disp,
         "DSA_PROVIDER_SECTION": dsa_provider_html,
         "SKIN_DELETE_SECTION": skin_delete_html,
@@ -801,6 +833,7 @@ def html():
         "BKK_DATA_SECTION": bkk_data_section,
         "HF_CLOCKTIME": _hf("clocktime", _active_skin),
         "HF_TONE": _hf("tone", _active_skin),
+        "HF_DIRECTION": _hf("direction", _active_skin),
         "HF_SHOW_STATION": _hf("show_my_station", _active_skin),
         "HF_MAXDEST": _hf("maxdest", _active_skin),
         "HF_LINE_LENGTH": _hf("line_length", _active_skin),

@@ -605,6 +605,23 @@ def huvudsidan(request):
         except: pass
         functions.switch(_screen=False)
         return (200, {}, "")
+    elif "lu_long" in request.params:
+        varinit.settings["lu_long"] = "cut" if request.params["lu_long"] == "cut" else "scroll"
+        functions.switch(_screen=False)
+        return (200, {}, "")
+    elif "lu_line" in request.params or "lu_direction" in request.params:
+        key = "lu_line" if "lu_line" in request.params else "lu_direction"
+        text = str(request.params[key])
+        for a in html_decode: text = text.replace(a, html_decode[a])
+        varinit.settings[key] = text.strip()[:60]
+        functions.switch(_screen=False)
+        return (200, {}, "")
+    elif "lu_hide_dest" in request.params:
+        parts = str(request.params["lu_hide_dest"])
+        for a in html_decode: parts = parts.replace(a, html_decode[a])
+        varinit.settings["lu_hide_dest"] = [p.strip() for p in parts.split(",") if p.strip()][:30]
+        functions.switch(_screen=False)
+        return (200, {}, "")
     elif "arrival_style" in request.params:
         v = request.params["arrival_style"]
         if v == "switch": v = "off" if functions.arrival_style() != "off" else "bkk"
