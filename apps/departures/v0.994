@@ -1,4 +1,5 @@
 {"description":"Live public transport departures around Europe (formerly known as T-Skylt)",
+"v0.994" : ["Smoother PA scrolling, /pa/perf statistics"],
 "v0.993" : ["Smaller install: README off the box, compact skin fonts"],
 "v0.992" : ["Passenger announcements: full-screen, scrolling and reminder PAs (BKK skin)"],
 "v0.991" : ["BKK skin: choose text or logo for static mode"],

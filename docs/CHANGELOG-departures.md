@@ -3,6 +3,13 @@
 Builds of the official MatrixBOX Departures app (based on official v0.985, 15 Nov 2026) with Budapest/BKK support.
 Install/update from the box's **Apps** page with `repository_url` set to this fork. Restart the box after a new release so it sees the new version.
 
+## 0.994 — Smoother PA scrolling (2026-11-20)
+- **Settings page:** the announcements card checks the box's status only while the page is visible, every 10 s instead of 5 (each check stops the board's animation for a moment).
+- **New page `/pa/perf`:** scrolling statistics from the box: stalls, memory clean-ups, requests, main-loop time, free memory. `?reset=1` starts a new measurement. Linked at the bottom of the announcements card.
+- The PA engine no longer makes garbage on every animation frame. Needs BKK skin v12 (installs automatically) for the rest of the smoothing.
+
+Update from the box's **Apps** page (restart the box first so it sees the new version).
+
 ## 0.993 — Smaller install (2026-11-20)
 - The app's README moved to `docs/README-departures.md`, so the box no longer downloads it. The app removes the old copy from the box the first time it starts (3 KB). The box's installer never deletes files by itself, so this one-off cleanup is needed.
 - The announcement preview on the settings page reads the new compact font files of BKK skin v9 and Wiener Linien skin v4 (fonts **20 KB smaller** together). Older font files still work.

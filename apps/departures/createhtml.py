@@ -1022,6 +1022,34 @@ def _pa_font(request):
     except Exception:
         return _pa_json("{}")
 
+@ampule.route("/pa/perf")
+def _pa_perf(request):
+    """Scrolling smoothness on the box: frame stalls, garbage collections and
+    requests since the last reset (?reset=1). Plain text, to copy into a chat."""
+    import gc, pa
+    ns = varinit.active_skin_ns
+    perf = ns.get("PERF") if ns else None
+    if not perf:
+        return (200, {"Cache-Control": "no-store"}, "No PA skin running (or it has no statistics).")
+    secs = max(1, (pa.ms() - perf.get("since_ms", 0)) // 1000)
+    f = max(1, perf["frames"])
+    lines = [
+        "PA scrolling statistics, last %d s" % secs,
+        "frames while scrolling: %d (about %d per second)" % (perf["frames"], perf["frames"] // secs),
+        "stalls over 60 ms: %d, over 150 ms: %d, over 500 ms: %d" % (perf["gap_60"], perf["gap_150"], perf["gap_500"]),
+        "longest stall: %d ms" % perf["max_gap_ms"],
+        "planned memory clean-ups: %d, total %d ms, longest %d ms" % (perf["gc"], perf["gc_ms"], perf["gc_max_ms"]),
+        "data requests: %d, total %d ms, longest %d ms" % (perf["req"], perf["req_ms"], perf["req_max_ms"]),
+        "average main loop: %s ms" % (ampule.loop_time_ms() if hasattr(ampule, "loop_time_ms") else "n/a"),
+        "free memory: %s KB" % (gc.mem_free() // 1024 if hasattr(gc, "mem_free") else "n/a"),
+        "share of frames stalled over 60 ms: %d%%" % (100 * perf["gap_60"] // f),
+    ]
+    if "reset" in request.params:
+        try: ns["perf_reset"]()
+        except Exception: pass
+        lines.append("(statistics reset)")
+    return (200, {"Cache-Control": "no-store"}, "<pre>" + "\n".join(lines) + "</pre>")
+
 @ampule.route("/pa", method="POST")
 def _pa_save(request):
     import pa

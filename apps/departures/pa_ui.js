@@ -239,7 +239,9 @@
       '<div style="font-size:.8rem">Box time: <b id="pa_boxtime">' + esc(S.box_time || 'not known yet') + '</b>' +
       '<div style="font-size:.72rem;color:var(--muted)">Start and end times use this clock. It should match your local time.</div></div>' +
       '<div style="width:150px"><label>Scroll speed</label><select id="pa_speed" class="form-control">' + sp + '</select></div></div>' +
-      '<div id="pa_box_fs"></div><div id="pa_box_sc"></div><div id="pa_box_rm"></div>';
+      '<div id="pa_box_fs"></div><div id="pa_box_sc"></div><div id="pa_box_rm"></div>' +
+      '<div style="font-size:.72rem;color:var(--muted);margin-top:14px">Scrolling not smooth? Let it run a minute with this page closed, then open ' +
+      '<a href="/pa/perf" target="_blank">/pa/perf</a> for the board\'s statistics.</div>';
     $('pa_speed').onchange = function () { post({id: 'speed', speed: $('pa_speed').value}, null); S.speed = $('pa_speed').value; refreshBottom('rm'); };
     KEYS.forEach(render);
   }
@@ -317,7 +319,11 @@
     if (started) return;
     started = true;
     load(true);
-    timer = setInterval(function () { if (card.style.display !== 'none') load(false); }, 5000);
+    // every request makes the box stop animating for a moment: check only while
+    // this page is actually being looked at, and not too often
+    timer = setInterval(function () {
+      if (card.style.display !== 'none' && document.visibilityState === 'visible') load(false);
+    }, 10000);
   }
   var sk = document.getElementById('skin_select');
   if (sk) sk.addEventListener('change', function () {

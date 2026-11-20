@@ -66,10 +66,15 @@ def _settings():
 _TEST_SETTINGS = {}
 
 
+_cfg_seen = [None]      # id of the settings["pa"] dict already completed with defaults
+
 def cfg():
-    """settings["pa"], completed with defaults (stored back so it persists)."""
+    """settings["pa"], completed with defaults (stored back so it persists).
+    Called every animation frame: once a dict has been checked it is returned
+    as it is, so no garbage is made per frame (garbage collection = stutter)."""
     s = _settings()
     raw = s.get("pa")
+    if raw is not None and id(raw) == _cfg_seen[0]: return raw
     d = defaults()
     if not isinstance(raw, dict):
         s["pa"] = d
@@ -79,6 +84,7 @@ def cfg():
         for kk, vv in d[k].items():
             if kk not in raw[k]: raw[k][kk] = vv
     if raw.get("speed") not in SPEEDS: raw["speed"] = "normal"
+    _cfg_seen[0] = id(raw)
     return raw
 
 
@@ -93,7 +99,7 @@ def persist():
 
 
 # --- wall clock ------------------------------------------------------------------
-def wall():
+def wall(now_ms=None):
     """Box local time in whole seconds, or None while it isn't known yet."""
     if not _HOST: return _TEST_WALL[0]
     ct = getattr(varinit, "currenttime", "")
@@ -103,7 +109,7 @@ def wall():
         if ct <= 0: return None
     at = getattr(varinit, "currenttime_ms", None)
     if at is None: return ct
-    return ct + (ms() - at) // 1000
+    return ct + ((ms() if now_ms is None else now_ms) - at) // 1000
 
 _TEST_WALL = [None]
 
@@ -310,7 +316,7 @@ class Engine:
         if not self.enabled(): return False
         if now is None: now = ms()
         c = cfg()
-        w = wall()
+        w = wall(now)
         changed = False
 
         sp = c["speed"]
@@ -434,8 +440,8 @@ class Engine:
 
 
 def _fs_has_text(f):
-    for r in f.get("rows") or []:
-        if isinstance(r, dict) and str(r.get("t", "")).strip(): return True
+    for r in f.get("rows") or ():
+        if isinstance(r, dict) and r.get("t"): return True      # stored already cleaned
     return False
 
 
