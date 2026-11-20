@@ -46,5 +46,11 @@
   "commit": "5f934e4665f61215f610fc176d1923553e855fdc",
   "title": "Departures 0.993 — smaller install",
   "notes": "dep-0.993.md"
+ },
+ {
+  "tag": "departures-v0.994",
+  "commit": "8c822485d6216a385fa25669a25b354b83df80a2",
+  "title": "Departures 0.994 — smoother PA scrolling",
+  "notes": "dep-0.994.md"
  }
 ]
